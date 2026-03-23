@@ -1,3 +1,4 @@
+#include <expected>
 #include <cassert>
 #include <fstream>
 #include <functional>
@@ -31,16 +32,16 @@ File::~File() {
 std::expected<File, FileError>
 File::try_create(const std::filesystem::path &path) {
   if (!std::filesystem::exists(path)) {
-    return std::unexpected(FileError::NotFound);
+    return std::unexpected<FileError>(FileError::NotFound);
   }
 
   if (!std::filesystem::is_regular_file(path)) {
-    return std::unexpected(FileError::NotRegularFile);
+    return std::unexpected<FileError>(FileError::NotRegularFile);
   }
 
   std::ifstream stream(path, std::ios::binary);
   if (!stream) {
-    return std::unexpected(FileError::Unknown);
+    return std::unexpected<FileError>(FileError::Unknown);
   }
 
   std::string contents((std::istreambuf_iterator<char>(stream)),
@@ -81,7 +82,7 @@ File::deserialize(std::istream &is, const std::filesystem::path &base_path) {
   std::string filename = SerializeUtils::read_string(is);
   std::string hash_val = SerializeUtils::read_string(is);
   if (!is) {
-    return std::unexpected(FileError::Unknown);
+    return std::unexpected<FileError>(FileError::Unknown);
   }
   return create_remote(base_path / filename, hash_val);
 }

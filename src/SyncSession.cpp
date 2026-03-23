@@ -1,3 +1,4 @@
+#include <expected>
 #include "SyncSession.h"
 #include "Directory.h"
 #include "SyncAction.h"
@@ -45,7 +46,7 @@ send_actions(NetworkConnection &conn,
 
       auto file_content_res = conn.recv_string();
       if (!file_content_res)
-        return std::unexpected("Failed to recv file: " +
+        return std::unexpected<std::string>("Failed to recv file: " +
                                file_content_res.error());
 
       auto target_path = local_sync_folder / rel_path;
@@ -71,7 +72,7 @@ serve_requests(NetworkConnection &conn,
   while (true) {
     auto msg_res = conn.recv_string();
     if (!msg_res)
-      return std::unexpected(msg_res.error());
+      return std::unexpected<std::string>(msg_res.error());
     std::string msg = *msg_res;
 
     if (msg == "DONE_ACTIONS") {
@@ -82,7 +83,7 @@ serve_requests(NetworkConnection &conn,
 
       std::ifstream ifs(full_path, std::ios::binary);
       if (!ifs)
-        return std::unexpected("Failed to open file for sending: " +
+        return std::unexpected<std::string>("Failed to open file for sending: " +
                                full_path.string());
 
       std::ostringstream file_oss;
@@ -91,7 +92,7 @@ serve_requests(NetworkConnection &conn,
       if (!s_res)
         return s_res;
     } else {
-      return std::unexpected("Unknown command: " + msg);
+      return std::unexpected<std::string>("Unknown command: " + msg);
     }
   }
   return {};
@@ -102,7 +103,7 @@ SyncSession::run_client_side(NetworkConnection &conn) {
   // 1. Send Local Directory to Server
   auto local_dir_res = Directory::try_create(local_sync_folder);
   if (!local_dir_res)
-    return std::unexpected("Failed to read local directory");
+    return std::unexpected<std::string>("Failed to read local directory");
 
   std::ostringstream oss;
   local_dir_res->serialize(oss);
@@ -118,18 +119,18 @@ SyncSession::run_client_side(NetworkConnection &conn) {
   // 3. Receive Remote Directory from Server
   auto rec_res = conn.recv_string();
   if (!rec_res)
-    return std::unexpected("Failed to receive directory tree from server: " +
+    return std::unexpected<std::string>("Failed to receive directory tree from server: " +
                            rec_res.error());
 
   std::istringstream iss(*rec_res);
   auto remote_dir_res = Directory::deserialize(iss, std::filesystem::path{""});
   if (!remote_dir_res)
-    return std::unexpected("Failed to deserialize directory");
+    return std::unexpected<std::string>("Failed to deserialize directory");
 
   // 4. Compute what we need from the Server and request it
   auto new_local_dir_res = Directory::try_create(local_sync_folder);
   if (!new_local_dir_res)
-    return std::unexpected("Failed to read local directory after serving");
+    return std::unexpected<std::string>("Failed to read local directory after serving");
 
   auto actions = compute_diff(*remote_dir_res, *new_local_dir_res);
   auto act_res = send_actions(conn, local_sync_folder, actions);
@@ -144,18 +145,18 @@ SyncSession::run_server_side(NetworkConnection &conn) {
   // 1. Receive Remote Directory from Client
   auto rec_res = conn.recv_string();
   if (!rec_res)
-    return std::unexpected("Failed to receive directory tree from client: " +
+    return std::unexpected<std::string>("Failed to receive directory tree from client: " +
                            rec_res.error());
 
   std::istringstream iss(*rec_res);
   auto remote_dir_res = Directory::deserialize(iss, std::filesystem::path{""});
   if (!remote_dir_res)
-    return std::unexpected("Failed to deserialize directory");
+    return std::unexpected<std::string>("Failed to deserialize directory");
 
   // 2. Compute what Server needs from Client and request it
   auto local_dir_res = Directory::try_create(local_sync_folder);
   if (!local_dir_res)
-    return std::unexpected("Failed to read local directory");
+    return std::unexpected<std::string>("Failed to read local directory");
 
   auto actions = compute_diff(*remote_dir_res, *local_dir_res);
   auto act_res = send_actions(conn, local_sync_folder, actions);
@@ -165,7 +166,7 @@ SyncSession::run_server_side(NetworkConnection &conn) {
   // 3. Send Local Directory to Client
   auto new_local_dir_res = Directory::try_create(local_sync_folder);
   if (!new_local_dir_res)
-    return std::unexpected("Failed to read local directory after receiving");
+    return std::unexpected<std::string>("Failed to read local directory after receiving");
 
   std::ostringstream oss;
   new_local_dir_res->serialize(oss);

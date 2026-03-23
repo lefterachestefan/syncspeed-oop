@@ -1,5 +1,5 @@
 #include "Network.h"
-
+#include <expected>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <iostream>
@@ -43,7 +43,7 @@ std::expected<void, std::string> NetworkConnection::send_exact(const void *data,
   while (bytes_sent < len) {
     ssize_t ret = send(socket_fd, ptr + bytes_sent, len - bytes_sent, 0);
     if (ret < 0) {
-      return std::unexpected("send failed: " + std::string(strerror(errno)));
+      return std::unexpected<std::string>("send failed: " + std::string(strerror(errno)));
     }
     bytes_sent += ret;
   }
@@ -57,10 +57,10 @@ std::expected<void, std::string> NetworkConnection::recv_exact(void *data,
   while (bytes_recv < len) {
     ssize_t ret = recv(socket_fd, ptr + bytes_recv, len - bytes_recv, 0);
     if (ret < 0) {
-      return std::unexpected("recv failed: " + std::string(strerror(errno)));
+      return std::unexpected<std::string>("recv failed: " + std::string(strerror(errno)));
     }
     if (ret == 0) {
-      return std::unexpected("Connection closed by peer");
+      return std::unexpected<std::string>("Connection closed by peer");
     }
     bytes_recv += ret;
   }
@@ -80,12 +80,12 @@ std::expected<std::string, std::string> NetworkConnection::recv_string() {
   uint64_t len = 0;
   auto res = recv_exact(&len, sizeof(len));
   if (!res)
-    return std::unexpected(res.error());
+    return std::unexpected<std::string>(res.error());
 
   std::string str(len, '\0');
   auto res2 = recv_exact(str.data(), len);
   if (!res2)
-    return std::unexpected(res2.error());
+    return std::unexpected<std::string>(res2.error());
 
   return str;
 }
@@ -131,10 +131,10 @@ std::expected<void, std::string> NetworkServer::bind_and_listen(uint16_t port) {
   addr.sin_port = htons(port);
 
   if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    return std::unexpected("Bind failed: " + std::string(strerror(errno)));
+    return std::unexpected<std::string>("Bind failed: " + std::string(strerror(errno)));
   }
   if (listen(server_fd, 5) < 0) {
-    return std::unexpected("Listen failed: " + std::string(strerror(errno)));
+    return std::unexpected<std::string>("Listen failed: " + std::string(strerror(errno)));
   }
   return {};
 }
@@ -146,7 +146,7 @@ NetworkServer::accept_connection() {
   int client_fd =
       accept(server_fd, (struct sockaddr *)&client_addr, &client_len);
   if (client_fd < 0) {
-    return std::unexpected("Accept failed: " + std::string(strerror(errno)));
+    return std::unexpected<std::string>("Accept failed: " + std::string(strerror(errno)));
   }
   return NetworkConnection(client_fd);
 }
@@ -173,7 +173,7 @@ std::expected<NetworkConnection, std::string>
 NetworkClient::connect_to(const std::string &ip, uint16_t port) {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0)
-    return std::unexpected("Socket creation failed: " +
+    return std::unexpected<std::string>("Socket creation failed: " +
                            std::string(strerror(errno)));
 
   sockaddr_in serv_addr{};
@@ -181,12 +181,12 @@ NetworkClient::connect_to(const std::string &ip, uint16_t port) {
   serv_addr.sin_port = htons(port);
 
   if (inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0) {
-    return std::unexpected("Invalid address / Address not supported");
+    return std::unexpected<std::string>("Invalid address / Address not supported");
   }
 
   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
     close(sock);
-    return std::unexpected("Connection Failed: " +
+    return std::unexpected<std::string>("Connection Failed: " +
                            std::string(strerror(errno)));
   }
   return NetworkConnection(sock);
@@ -196,3 +196,4 @@ bool NetworkClient::test_connection(const std::string &ip, uint16_t port) {
     auto res = connect_to(ip, port);
     return res.has_value();
 }
+

@@ -1,3 +1,4 @@
+#include <expected>
 #include <algorithm>
 #include <iostream>
 
@@ -24,7 +25,7 @@ Device::SyncException Device::sync_folder(const std::filesystem::path& folder_pa
 					[&folder_path](const SyncedFolder& f) { return f.get_path() == folder_path; });
 
 	if (has_duplicate) {
-		return std::unexpected(SyncDirectoryError::AlreadySynced);
+		return std::unexpected<SyncDirectoryError>(SyncDirectoryError::AlreadySynced);
 	}
 
 	return SyncedFolder::try_create(folder_path)
@@ -32,7 +33,7 @@ Device::SyncException Device::sync_folder(const std::filesystem::path& folder_pa
 			folders.push_back(std::move(folder));
 			return {};
 		})
-		.or_else([](auto err) -> SyncException { return std::unexpected(err); });
+		.or_else([](auto err) -> SyncException { return std::unexpected<SyncDirectoryError>(err); });
 }
 
 Device::UnsyncException Device::unsync_folder(const std::filesystem::path& folder_path) {
@@ -40,7 +41,7 @@ Device::UnsyncException Device::unsync_folder(const std::filesystem::path& folde
 						   [&folder_path](const auto& f) { return f.get_path() == folder_path; });
 
 	if (it == folders.end()) {
-		return std::unexpected(UnsyncDirectoryError::NotSynced);
+		return std::unexpected<UnsyncDirectoryError>(UnsyncDirectoryError::NotSynced);
 	}
 
 	folders.erase(it);

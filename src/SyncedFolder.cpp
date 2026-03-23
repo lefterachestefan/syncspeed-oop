@@ -1,3 +1,4 @@
+#include <expected>
 #include "SyncedFolder.h"
 #include <iostream>
 
@@ -12,7 +13,7 @@ SyncedFolder::try_create(const std::filesystem::path &path) {
     auto incomplete = SyncedFolder(path);
     auto res = incomplete.rescan();
     if (!res)
-        return std::unexpected(SyncDirectoryError::BadPermissions);
+        return std::unexpected<SyncDirectoryError>(SyncDirectoryError::BadPermissions);
     return incomplete;
 }
 
