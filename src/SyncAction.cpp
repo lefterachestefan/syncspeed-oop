@@ -22,8 +22,9 @@ std::string SyncAction::get_type_string() const {
 				return "DeleteFile";
 			} else if constexpr (std::is_same_v<T, Sync::ConflictFile>) {
 				return "ConflictFile";
+			} else {
+				return "Unknown";
 			}
-			return "Unknown";
 		},
 		action);
 }
