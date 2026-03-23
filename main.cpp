@@ -15,7 +15,7 @@
 #include "include/SyncSession.h"
 #include "include/Watcher.h"
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 	// test_rule_of_three();
 
 #if defined(_WIN32) || defined(_WIN64)
