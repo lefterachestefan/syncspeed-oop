@@ -24,7 +24,7 @@ class Device {
 	std::vector<SyncedFolder> folders;
 
    public:
-	explicit Device(const std::string& device_id);
+	explicit Device(std::string device_id);
 
 	std::expected<void, FileError> rescan();
 

@@ -14,10 +14,9 @@ class Directory {
 	std::filesystem::path path;
 
    public:
-	explicit Directory(const std::filesystem::path& path);
+	explicit Directory(std::filesystem::path path);
 
-	Directory(const std::filesystem::path& path,
-			  std::vector<std::variant<Directory, File>> children);
+	Directory(std::filesystem::path path, std::vector<std::variant<Directory, File>> children);
 
 	static std::expected<Directory, FileError> try_create(const std::filesystem::path& path);
 	static Directory create_remote(const std::filesystem::path& path,

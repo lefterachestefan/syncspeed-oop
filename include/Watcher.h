@@ -21,7 +21,7 @@ class DirectoryWatcher {
 	void watch_loop(std::function<void()> on_change);
 
    public:
-	explicit DirectoryWatcher(const std::filesystem::path& path);
+	explicit DirectoryWatcher(std::filesystem::path path);
 	~DirectoryWatcher();
 
 	DirectoryWatcher(const DirectoryWatcher&) = delete;

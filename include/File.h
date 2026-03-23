@@ -17,11 +17,11 @@ class File {
 	std::filesystem::path path;
 
    public:
-	explicit File(const std::filesystem::path& path);
+	explicit File(std::filesystem::path path);
 
-	File(const File& other);
+	File(const File& other) = default;
 	File& operator=(const File& other);
-	~File();
+	~File() = default;
 
 	static std::expected<File, FileError> try_create(const std::filesystem::path& path);
 

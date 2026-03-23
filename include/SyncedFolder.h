@@ -19,7 +19,7 @@ class SyncedFolder {
 	std::filesystem::path path;
 
    public:
-	explicit SyncedFolder(const std::filesystem::path& path);
+	explicit SyncedFolder(std::filesystem::path path);
 
 	static std::expected<SyncedFolder, SyncDirectoryError> try_create(
 		const std::filesystem::path& path);
@@ -38,7 +38,7 @@ class SyncedFolder {
 	SyncedFolder(const SyncedFolder&) = delete;
 	SyncedFolder& operator=(const SyncedFolder&) = delete;
 
-	~SyncedFolder();
+	~SyncedFolder() = default;
 
 	friend std::ostream& operator<<(std::ostream& os, const SyncedFolder& folder);
 };

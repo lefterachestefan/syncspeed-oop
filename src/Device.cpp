@@ -1,11 +1,11 @@
-#include <expected>
 #include <algorithm>
+#include <expected>
 #include <iostream>
 
 #include "Device.h"
 
-Device::Device(const std::string& device_id) : device_id(device_id) {
-	// Default to Linux as in original code
+Device::Device(std::string device_id) : device_id(std::move(device_id)) {
+	// TODO: multi platform support
 	kind = DeviceKind::Linux;
 }
 
@@ -33,7 +33,8 @@ Device::SyncException Device::sync_folder(const std::filesystem::path& folder_pa
 			folders.push_back(std::move(folder));
 			return {};
 		})
-		.or_else([](auto err) -> SyncException { return std::unexpected<SyncDirectoryError>(err); });
+		.or_else(
+			[](auto err) -> SyncException { return std::unexpected<SyncDirectoryError>(err); });
 }
 
 Device::UnsyncException Device::unsync_folder(const std::filesystem::path& folder_path) {

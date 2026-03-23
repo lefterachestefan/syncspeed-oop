@@ -12,7 +12,7 @@ class SyncSession {
 	const std::filesystem::path local_sync_folder;
 
    public:
-	explicit SyncSession(const std::filesystem::path& local_path);
+	explicit SyncSession(std::filesystem::path local_path);
 
 	std::expected<void, std::string> run_server_side(NetworkConnection& conn);
 	std::expected<void, std::string> run_client_side(NetworkConnection& conn);
