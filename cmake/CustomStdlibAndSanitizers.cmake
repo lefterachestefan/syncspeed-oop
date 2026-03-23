@@ -26,7 +26,7 @@ function(set_custom_stdlib_and_sanitizers target add_apple_asan)
 
     if(APPLE)
         # first check Apple since Apple is also a kind of Unix
-        if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" AND add_apple_asan MATCHES true)
+        if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" AND add_apple_asan STREQUAL "TRUE")
             if(USE_ASAN)
                 target_compile_options(${target} PRIVATE "$<${debug_mode}:-fsanitize=address,undefined>")
                 target_link_options(${target} PRIVATE "$<${debug_mode}:-fsanitize=address,undefined>")
