@@ -31,11 +31,11 @@ class Device {
 	using SyncException = std::expected<void, SyncDirectoryError>;
 	SyncException sync_folder(const std::filesystem::path& folder_path);
 
-	using UnsyncException = std::expected<void, UnsyncDirectoryError>;
-	UnsyncException unsync_folder(const std::filesystem::path& folder_path);
+	// using UnsyncException = std::expected<void, UnsyncDirectoryError>; // Currently unused
+	// UnsyncException unsync_folder(const std::filesystem::path& folder_path); // Currently unused
 
-	[[nodiscard]] const std::string& get_id() const;
-	[[nodiscard]] DeviceKind get_kind() const;
+	// [[nodiscard]] const std::string& get_id() const; // Currently unused
+	// [[nodiscard]] DeviceKind get_kind() const; // Currently unused
 
 	friend std::ostream& operator<<(std::ostream& os, const Device& device);
 };

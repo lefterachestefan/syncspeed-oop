@@ -33,7 +33,7 @@ class Directory {
 
 	[[nodiscard]] size_t count_files() const;
 	[[nodiscard]] size_t count_directories() const;
-	[[nodiscard]] bool is_empty() const;
+	// [[nodiscard]] bool is_empty() const; // currently unused
 };
 
 #endif

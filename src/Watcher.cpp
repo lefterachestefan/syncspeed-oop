@@ -103,9 +103,9 @@ void DirectoryWatcher::stop() {
 	}
 }
 
-bool DirectoryWatcher::is_running() const { return running; }
+// bool DirectoryWatcher::is_running() const { return running; } // Currently unused
 
-const std::filesystem::path& DirectoryWatcher::get_watched_path() const { return root_path; }
+// const std::filesystem::path& DirectoryWatcher::get_watched_path() const { return root_path; } // Currently unused
 
 std::ostream& operator<<(std::ostream& os, const DirectoryWatcher& watcher) {
 	os << "DirectoryWatcher(path=" << watcher.root_path

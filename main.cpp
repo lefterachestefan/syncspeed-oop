@@ -50,6 +50,14 @@
 int main(int argc, char** argv) {
 	// test_rule_of_three();
 
+#if defined(_WIN32) || defined(_WIN64)
+	std::cout << "Windows is not yet implemented\n";
+	return 0;
+#elif defined(__APPLE__) || defined(__MACH__)
+	std::cout << "macOS is not yet implemented\n";
+	return 0;
+#endif
+
 	if (argc < 2) {
 		std::cout << "Usage:\n";
 		std::cout << "  " << argv[0] << " server <port> <folder>\n";

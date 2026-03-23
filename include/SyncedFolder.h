@@ -26,7 +26,7 @@ class SyncedFolder {
 
 	std::expected<void, FileError> rescan();
 	[[nodiscard]] const std::filesystem::path& get_path() const;
-	[[nodiscard]] const Directory* get_top_folder() const;
+	// [[nodiscard]] const Directory* get_top_folder() const; // Currently unused
 
 	SyncedFolder(SyncedFolder&&) noexcept = default;
 	SyncedFolder& operator=(SyncedFolder&& other) noexcept {

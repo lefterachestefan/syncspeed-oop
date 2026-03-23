@@ -37,7 +37,8 @@ Device::SyncException Device::sync_folder(const std::filesystem::path& folder_pa
 			[](auto err) -> SyncException { return std::unexpected<SyncDirectoryError>(err); });
 }
 
-Device::UnsyncException Device::unsync_folder(const std::filesystem::path& folder_path) {
+/*
+Device::UnsyncException Device::unsync_folder(const std::filesystem::path& folder_path) { // Currently unused
 	auto it = std::find_if(folders.begin(), folders.end(),
 						   [&folder_path](const auto& f) { return f.get_path() == folder_path; });
 
@@ -49,9 +50,10 @@ Device::UnsyncException Device::unsync_folder(const std::filesystem::path& folde
 	return {};
 }
 
-const std::string& Device::get_id() const { return device_id; }
+const std::string& Device::get_id() const { return device_id; } // Currently unused
 
-DeviceKind Device::get_kind() const { return kind; }
+DeviceKind Device::get_kind() const { return kind; } // Currently unused
+*/
 
 std::ostream& operator<<(std::ostream& os, const Device& device) {
 	os << "Device(id=" << device.device_id

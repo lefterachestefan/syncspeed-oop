@@ -25,11 +25,11 @@ class NetworkConnection {
 	std::expected<void, std::string> send_string(const std::string& str);
 	std::expected<std::string, std::string> recv_string();
 
-	[[nodiscard]] int get_fd() const { return socket_fd; }
+	// [[nodiscard]] int get_fd() const { return socket_fd; } // Currently unused
 
 	friend std::ostream& operator<<(std::ostream& os, const NetworkConnection& conn);
 
-	[[nodiscard]] bool is_active() const;
+	// [[nodiscard]] bool is_active() const; // Currently unused
 	void close_connection();
 };
 
@@ -45,7 +45,7 @@ class NetworkServer {
 
 	friend std::ostream& operator<<(std::ostream& os, const NetworkServer& server);
 
-	[[nodiscard]] bool is_listening() const;
+	// [[nodiscard]] bool is_listening() const; // Currently unused
 	void stop();
 };
 
@@ -54,7 +54,7 @@ class NetworkClient {
 	static std::expected<NetworkConnection, std::string> connect_to(const std::string& ip,
 																	uint16_t port);
 
-	static bool test_connection(const std::string& ip, uint16_t port);
+	// static bool test_connection(const std::string& ip, uint16_t port); // Currently unused
 };
 
 #endif

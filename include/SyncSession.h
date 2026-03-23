@@ -17,10 +17,10 @@ class SyncSession {
 	std::expected<void, std::string> run_server_side(NetworkConnection& conn);
 	std::expected<void, std::string> run_client_side(NetworkConnection& conn);
 
-	[[nodiscard]] const std::filesystem::path& get_local_path() const;
+	// [[nodiscard]] const std::filesystem::path& get_local_path() const; // Currently unused
 
-	static std::expected<void, std::string> server_sync(
-		NetworkConnection& conn, const std::filesystem::path& local_sync_folder);
+	// static std::expected<void, std::string> server_sync(
+	// 	NetworkConnection& conn, const std::filesystem::path& local_sync_folder); // Currently unused
 	static std::expected<void, std::string> client_sync(
 		NetworkConnection& conn, const std::filesystem::path& local_sync_folder);
 

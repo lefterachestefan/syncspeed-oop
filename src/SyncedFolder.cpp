@@ -25,7 +25,7 @@ std::expected<void, FileError> SyncedFolder::rescan() {
 
 const std::filesystem::path& SyncedFolder::get_path() const { return path; }
 
-const Directory* SyncedFolder::get_top_folder() const { return top_folder.get(); }
+// const Directory* SyncedFolder::get_top_folder() const { return top_folder.get(); } // Currently unused
 
 std::ostream& operator<<(std::ostream& os, const SyncedFolder& folder) {
 	os << "SyncedFolder(path=" << folder.path << ")";

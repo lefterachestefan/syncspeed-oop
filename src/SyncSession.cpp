@@ -11,7 +11,7 @@
 SyncSession::SyncSession(std::filesystem::path local_path)
 	: local_sync_folder(std::move(local_path)) {}
 
-const std::filesystem::path& SyncSession::get_local_path() const { return local_sync_folder; }
+// const std::filesystem::path& SyncSession::get_local_path() const { return local_sync_folder; } // Currently unused
 
 std::expected<void, std::string> send_actions(NetworkConnection& conn,
 											  const std::filesystem::path& local_sync_folder,
@@ -197,11 +197,13 @@ std::expected<void, std::string> SyncSession::run_server_side(NetworkConnection&
 	return {};
 }
 
-std::expected<void, std::string> SyncSession::server_sync(
+/*
+std::expected<void, std::string> SyncSession::server_sync( // Currently unused
 	NetworkConnection& conn, const std::filesystem::path& local_sync_folder) {
 	SyncSession session(local_sync_folder);
 	return session.run_server_side(conn);
 }
+*/
 
 std::expected<void, std::string> SyncSession::client_sync(
 	NetworkConnection& conn, const std::filesystem::path& local_sync_folder) {

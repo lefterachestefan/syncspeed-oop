@@ -30,8 +30,8 @@ class DirectoryWatcher {
 	void start(std::function<void()> on_change);
 	void stop();
 
-	[[nodiscard]] bool is_running() const;
-	[[nodiscard]] const std::filesystem::path& get_watched_path() const;
+	// [[nodiscard]] bool is_running() const; // Currently unused
+	// [[nodiscard]] const std::filesystem::path& get_watched_path() const; // Currently unused
 
 	friend std::ostream& operator<<(std::ostream& os, const DirectoryWatcher& watcher);
 };

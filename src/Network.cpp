@@ -96,7 +96,7 @@ std::ostream& operator<<(std::ostream& os, const NetworkConnection& conn) {
 	return os;
 }
 
-bool NetworkConnection::is_active() const { return socket_fd >= 0; }
+// bool NetworkConnection::is_active() const { return socket_fd >= 0; } // Currently unused
 
 void NetworkConnection::close_connection() {
 	if (socket_fd >= 0) {
@@ -152,7 +152,7 @@ std::ostream& operator<<(std::ostream& os, const NetworkServer& server) {
 	return os;
 }
 
-bool NetworkServer::is_listening() const { return server_fd >= 0; }
+// bool NetworkServer::is_listening() const { return server_fd >= 0; } // Currently unused
 
 void NetworkServer::stop() {
 	if (server_fd >= 0) {
@@ -186,7 +186,9 @@ std::expected<NetworkConnection, std::string> NetworkClient::connect_to(const st
 	return NetworkConnection(sock);
 }
 
-bool NetworkClient::test_connection(const std::string& ip, uint16_t port) {
+/*
+bool NetworkClient::test_connection(const std::string& ip, uint16_t port) { // Currently unused
 	auto res = connect_to(ip, port);
 	return res.has_value();
 }
+*/
