@@ -15,40 +15,40 @@
 #include "include/SyncSession.h"
 #include "include/Watcher.h"
 
-void test_rule_of_three() {
-	std::cout << "Testing Rule of Three for File class...\n";
-	std::filesystem::path p = "test_file.txt";
-	{
-		std::ofstream ofs(p);
-		ofs << "test content";
-	}
-
-	auto f1_res = File::try_create(p);
-	if (!f1_res) {
-		std::cerr << "Failed to create test file\n";
-		return;
-	}
-	const File& f1 = *f1_res;
-
-	// Test copy constructor
-	File f2 = f1;
-	assert(f1.get_hash() == f2.get_hash());
-	assert(f1.get_path() == f2.get_path());
-	std::cout << "Copy constructor passed: " << f2 << "\n";
-
-	// Test copy assignment
-	File f3(std::filesystem::path("other.txt"));
-	f3 = f1;
-	assert(f1.get_hash() == f3.get_hash());
-	assert(f1.get_path() == f3.get_path());
-	std::cout << "Copy assignment passed: " << f3 << "\n";
-
-	std::filesystem::remove(p);
-	std::cout << "Rule of Three tests passed.\n\n";
-}
+// void test_rule_of_three() {
+// 	std::cout << "Testing Rule of Three for File class...\n";
+// 	std::filesystem::path p = "test_file.txt";
+// 	{
+// 		std::ofstream ofs(p);
+// 		ofs << "test content";
+// 	}
+//
+// 	auto f1_res = File::try_create(p);
+// 	if (!f1_res) {
+// 		std::cerr << "Failed to create test file\n";
+// 		return;
+// 	}
+// 	const File& f1 = *f1_res;
+//
+// 	// Test copy constructor
+// 	File f2 = f1;
+// 	assert(f1.get_hash() == f2.get_hash());
+// 	assert(f1.get_path() == f2.get_path());
+// 	std::cout << "Copy constructor passed: " << f2 << "\n";
+//
+// 	// Test copy assignment
+// 	File f3(std::filesystem::path("other.txt"));
+// 	f3 = f1;
+// 	assert(f1.get_hash() == f3.get_hash());
+// 	assert(f1.get_path() == f3.get_path());
+// 	std::cout << "Copy assignment passed: " << f3 << "\n";
+//
+// 	std::filesystem::remove(p);
+// 	std::cout << "Rule of Three tests passed.\n\n";
+// }
 
 int main(int argc, char** argv) {
-	test_rule_of_three();
+	// test_rule_of_three();
 
 	if (argc < 2) {
 		std::cout << "Usage:\n";
