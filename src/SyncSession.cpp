@@ -205,11 +205,14 @@ std::expected<void, std::string> SyncSession::server_sync( // Currently unused
 }
 */
 
+// Currently unused
+/*
 std::expected<void, std::string> SyncSession::client_sync(
 	NetworkConnection& conn, const std::filesystem::path& local_sync_folder) {
 	SyncSession session(local_sync_folder);
 	return session.run_client_side(conn);
 }
+*/
 
 std::ostream& operator<<(std::ostream& os, const SyncSession& session) {
 	os << "SyncSession(folder=" << session.local_sync_folder << ")";

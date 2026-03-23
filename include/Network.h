@@ -30,7 +30,7 @@ class NetworkConnection {
 	friend std::ostream& operator<<(std::ostream& os, const NetworkConnection& conn);
 
 	// [[nodiscard]] bool is_active() const; // Currently unused
-	void close_connection();
+	// void close_connection(); // Currently unused
 };
 
 class NetworkServer {

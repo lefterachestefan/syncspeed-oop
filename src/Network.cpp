@@ -98,12 +98,15 @@ std::ostream& operator<<(std::ostream& os, const NetworkConnection& conn) {
 
 // bool NetworkConnection::is_active() const { return socket_fd >= 0; } // Currently unused
 
+// Currently unused
+/*
 void NetworkConnection::close_connection() {
 	if (socket_fd >= 0) {
 		close(socket_fd);
 		socket_fd = -1;
 	}
 }
+*/
 
 // --- NetworkServer ---
 
@@ -128,7 +131,7 @@ std::expected<void, std::string> NetworkServer::bind_and_listen(uint16_t port) {
 	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_port = htons(port);
 
-	if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+	if (bind(server_fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
 		return std::unexpected<std::string>("Bind failed: " + std::string(strerror(errno)));
 	}
 	if (listen(server_fd, 5) < 0) {
@@ -140,7 +143,7 @@ std::expected<void, std::string> NetworkServer::bind_and_listen(uint16_t port) {
 std::expected<NetworkConnection, std::string> NetworkServer::accept_connection() {
 	sockaddr_in client_addr{};
 	socklen_t client_len = sizeof(client_addr);
-	int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
+	int client_fd = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len);
 	if (client_fd < 0) {
 		return std::unexpected<std::string>("Accept failed: " + std::string(strerror(errno)));
 	}
@@ -179,7 +182,7 @@ std::expected<NetworkConnection, std::string> NetworkClient::connect_to(const st
 		return std::unexpected<std::string>("Invalid address / Address not supported");
 	}
 
-	if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+	if (connect(sock, reinterpret_cast<struct sockaddr*>(&serv_addr), sizeof(serv_addr)) < 0) {
 		close(sock);
 		return std::unexpected<std::string>("Connection Failed: " + std::string(strerror(errno)));
 	}

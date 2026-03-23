@@ -21,8 +21,8 @@ class SyncSession {
 
 	// static std::expected<void, std::string> server_sync(
 	// 	NetworkConnection& conn, const std::filesystem::path& local_sync_folder); // Currently unused
-	static std::expected<void, std::string> client_sync(
-		NetworkConnection& conn, const std::filesystem::path& local_sync_folder);
+	// static std::expected<void, std::string> client_sync(
+	// 	NetworkConnection& conn, const std::filesystem::path& local_sync_folder); // Currently unused
 
 	friend std::ostream& operator<<(std::ostream& os, const SyncSession& session);
 };

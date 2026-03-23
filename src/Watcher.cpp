@@ -64,7 +64,7 @@ void DirectoryWatcher::watch_loop(std::function<void()> on_change) {
 
 			bool triggers_change = false;
 			for (char* ptr = buffer; ptr < buffer + len;) {
-				auto* event = reinterpret_cast<struct inotify_event*>(ptr);
+				const auto* event = reinterpret_cast<const struct inotify_event*>(ptr);
 				ptr += sizeof(struct inotify_event) + event->len;
 
 				if (event->len > 0) {
