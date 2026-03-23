@@ -1,55 +1,166 @@
+#include <atomic>
+#include <cassert>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
-#include <array>
-#include "include/Example.h"
-// This also works if you do not want `include/`, but some editors might not like it
-// #include "Example.h"
+#include <mutex>
+#include <string>
+#include <thread>
 
-int main() {
-    std::cout << "Hello, world!\n";
-    Example e1;
-    e1.g();
-    std::array<int, 100> v{};
-    int nr;
-    std::cout << "Introduceți nr: ";
-    /////////////////////////////////////////////////////////////////////////
-    /// Observație: dacă aveți nevoie să citiți date de intrare de la tastatură,
-    /// dați exemple de date de intrare folosind fișierul tastatura.txt
-    /// Trebuie să aveți în fișierul tastatura.txt suficiente date de intrare
-    /// (în formatul impus de voi) astfel încât execuția programului să se încheie.
-    /// De asemenea, trebuie să adăugați în acest fișier date de intrare
-    /// pentru cât mai multe ramuri de execuție.
-    /// Dorim să facem acest lucru pentru a automatiza testarea codului, fără să
-    /// mai pierdem timp de fiecare dată să introducem de la zero aceleași date de intrare.
-    ///
-    /// Pe GitHub Actions (bife), fișierul tastatura.txt este folosit
-    /// pentru a simula date introduse de la tastatură.
-    /// Bifele verifică dacă programul are erori de compilare, erori de memorie și memory leaks.
-    ///
-    /// Dacă nu puneți în tastatura.txt suficiente date de intrare, îmi rezerv dreptul să vă
-    /// testez codul cu ce date de intrare am chef și să nu pun notă dacă găsesc vreun bug.
-    /// Impun această cerință ca să învățați să faceți un demo și să arătați părțile din
-    /// program care merg (și să le evitați pe cele care nu merg).
-    ///
-    /////////////////////////////////////////////////////////////////////////
-    std::cin >> nr;
-    /////////////////////////////////////////////////////////////////////////
-    for(int i = 0; i < nr; ++i) {
-        std::cout << "v[" << i << "] = ";
-        std::cin >> v[i];
-    }
-    std::cout << "\n\n";
-    std::cout << "Am citit de la tastatură " << nr << " elemente:\n";
-    for(int i = 0; i < nr; ++i) {
-        std::cout << "- " << v[i] << "\n";
-    }
-    ///////////////////////////////////////////////////////////////////////////
-    /// Pentru date citite din fișier, NU folosiți tastatura.txt. Creați-vă voi
-    /// alt fișier propriu cu ce alt nume doriți.
-    /// Exemplu:
-    /// std::ifstream fis("date.txt");
-    /// for(int i = 0; i < nr2; ++i)
-    ///     fis >> v2[i];
-    ///
-    ///////////////////////////////////////////////////////////////////////////
-    return 0;
+#include "include/Device.h"
+#include "include/Directory.h"
+#include "include/File.h"
+#include "include/Network.h"
+#include "include/SyncAction.h"
+#include "include/SyncSession.h"
+#include "include/Watcher.h"
+
+void test_rule_of_three() {
+	std::cout << "Testing Rule of Three for File class...\n";
+	std::filesystem::path p = "test_file.txt";
+	{
+		std::ofstream ofs(p);
+		ofs << "test content";
+	}
+
+	auto f1_res = File::try_create(p);
+	if (!f1_res) {
+		std::cerr << "Failed to create test file\n";
+		return;
+	}
+	const File& f1 = *f1_res;
+
+	// Test copy constructor
+	File f2 = f1;
+	assert(f1.get_hash() == f2.get_hash());
+	assert(f1.get_path() == f2.get_path());
+	std::cout << "Copy constructor passed: " << f2 << "\n";
+
+	// Test copy assignment
+	File f3(std::filesystem::path("other.txt"));
+	f3 = f1;
+	assert(f1.get_hash() == f3.get_hash());
+	assert(f1.get_path() == f3.get_path());
+	std::cout << "Copy assignment passed: " << f3 << "\n";
+
+	std::filesystem::remove(p);
+	std::cout << "Rule of Three tests passed.\n\n";
+}
+
+int main(int argc, char** argv) {
+	test_rule_of_three();
+
+	if (argc < 2) {
+		std::cout << "Usage:\n";
+		std::cout << "  " << argv[0] << " server <port> <folder>\n";
+		std::cout << "  " << argv[0] << " client <ip> <port> <folder>\n";
+		std::cout << "  " << argv[0] << " info <folder> (displays OOP info about folder)\n";
+		return 0;
+	}
+
+	std::string mode = argv[1];
+
+	if (mode == "info") {
+		if (argc < 3) {
+			std::cerr << "Usage: " << argv[0] << " info <folder>\n";
+			return 1;
+		}
+		std::filesystem::path folder = argv[2];
+		auto dir_res = Directory::try_create(folder);
+		if (!dir_res) {
+			std::cerr << "Error reading directory\n";
+			return 1;
+		}
+		std::cout << "Directory Info:\n" << *dir_res << "\n";
+		std::cout << "Files: " << dir_res->count_files() << "\n";
+		std::cout << "Subdirs: " << dir_res->count_directories() << "\n";
+
+		Device dev("local-device");
+		auto sync_res = dev.sync_folder(folder);
+		if (sync_res) {
+			std::cout << "Device status: " << dev << "\n";
+		}
+		return 0;
+	}
+
+	// Original logic adapted to new classes
+	if (mode == "server") {
+		if (argc < 4) {
+			return 1;
+		}
+		uint16_t port = std::stoi(argv[2]);
+		std::filesystem::path folder = argv[3];
+		std::filesystem::create_directories(folder);
+
+		NetworkServer server;
+		auto res = server.bind_and_listen(port);
+		if (!res) {
+			std::cerr << "Server error: " << res.error() << "\n";
+			return 1;
+		}
+		std::cout << server << " listening on port " << port << "...\n";
+
+		SyncSession session(folder);
+		while (true) {
+			auto client_res = server.accept_connection();
+			if (!client_res) {
+				std::cerr << "Accept error: " << client_res.error() << "\n";
+				continue;
+			}
+			std::cout << "Client connected: " << *client_res << "\n";
+			auto sync_res = session.run_server_side(*client_res);
+			if (!sync_res) {
+				std::cerr << "Sync session failed: " << sync_res.error() << "\n";
+			} else {
+				std::cout << "Sync session completed successfully.\n";
+			}
+		}
+	} else if (mode == "client") {
+		if (argc < 5) {
+			return 1;
+		}
+		std::string ip = argv[2];
+		uint16_t port = std::stoi(argv[3]);
+		std::filesystem::path folder = argv[4];
+		std::filesystem::create_directories(folder);
+
+		DirectoryWatcher watcher(folder);
+		std::cout << "Initiated " << watcher << "\n";
+
+		std::atomic<bool> trigger_sync{true};
+		std::mutex mtx;
+
+		watcher.start([&trigger_sync, &mtx]() {
+			std::lock_guard<std::mutex> lock(mtx);
+			trigger_sync = true;
+		});
+
+		SyncSession session(folder);
+		while (true) {
+			bool should_sync = false;
+			{
+				std::lock_guard<std::mutex> lock(mtx);
+				should_sync = trigger_sync;
+				trigger_sync = false;
+			}
+
+			if (should_sync) {
+				std::cout << "Changes detected. Connecting to " << ip << ":" << port << "...\n";
+				auto conn_res = NetworkClient::connect_to(ip, port);
+				if (!conn_res) {
+					std::cerr << "Client connection error: " << conn_res.error() << "\n";
+				} else {
+					auto sync_res = session.run_client_side(*conn_res);
+					if (!sync_res) {
+						std::cerr << "Sync failed: " << sync_res.error() << "\n";
+					} else {
+						std::cout << "Sync successful.\n";
+					}
+				}
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
+	}
+
+	return 0;
 }

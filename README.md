@@ -1,14 +1,6 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+# Syncspeed
 
-### Folosiți template-ul corespunzător grupei voastre!
-
-| Laborant  | Link template                                |
-|-----------|----------------------------------------------|
-| Dragoș B  | https://github.com/Ionnier/oop-template      |
-| Tiberiu M | https://github.com/MaximTiberiu/oop-template |
-| Marius MC | https://github.com/mcmarius/oop-template     |
-
-### Important!
+### Important
 
 Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar dacă documentați riguros acest proces.
 Codul generat pus "ca să fie"/pe care nu îl înțelegeți se punctează doar pentru puncte bonus, doar în contextul
@@ -34,11 +26,12 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 ## Tema 1
 
 #### Cerințe
+
 - [ ] definirea a minim **3-4 clase** folosind compunere cu clasele definite de voi; moștenirile nu se iau în considerare aici
 - [ ] constructori de inițializare cu parametri pentru fiecare clasă
 - [ ] pentru o aceeași (singură) clasă: constructor de copiere, `operator=` de copiere, destructor
-<!-- - [ ] pentru o altă clasă: constructor de mutare, `operator=` de mutare, destructor -->
-<!-- - [ ] pentru o altă clasă: toate cele 5 funcții membru speciale -->
+  <!-- - [ ] pentru o altă clasă: constructor de mutare, `operator=` de mutare, destructor -->
+  <!-- - [ ] pentru o altă clasă: toate cele 5 funcții membru speciale -->
 - [ ] `operator<<` pentru **toate** clasele pentru afișare (`std::ostream`) folosind compunere de apeluri cu `operator<<`
 - [ ] cât mai multe `const` (unde este cazul) și funcții `private`
 - [ ] implementarea a minim 3 funcții membru publice pentru funcționalități netriviale specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
@@ -54,6 +47,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 ## Tema 2
 
 #### Cerințe
+
 - [ ] separarea codului din clase în `.h` (sau `.hpp`) și `.cpp`
 - [ ] moșteniri:
   - minim o clasă de bază și **3 clase derivate** din aceeași ierarhie; cele 3 derivate moștenesc aceeași clasă de bază
@@ -75,7 +69,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 - [ ] funcții și atribute `static`
 - [ ] STL
 - [ ] cât mai multe `const`
-- [ ] funcții *de nivel înalt*, de eliminat cât mai mulți getters/setters/funcții low-level
+- [ ] funcții _de nivel înalt_, de eliminat cât mai mulți getters/setters/funcții low-level
 - [ ] minim 75-78% din codul propriu să fie C++
 - [ ] la sfârșit: commit separat cu adăugarea unei noi clase derivate fără a modifica restul codului, **pe lângă cele 3 derivate deja adăugate** din aceeași ierarhie
   - noua derivată nu poate fi una existentă care a fost ștearsă și adăugată din nou
@@ -86,6 +80,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 ## Tema 3
 
 #### Cerințe
+
 - [ ] 2 șabloane de proiectare (design patterns)
 - [ ] o clasă șablon cu sens; minim **2 instanțieri**
   - [ ] preferabil și o funcție șablon (template) cu sens; minim 2 instanțieri
@@ -101,28 +96,30 @@ Proiectul este configurat cu CMake.
 Instrucțiuni pentru terminal:
 
 1. Pasul de configurare
+
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 # sau ./scripts/cmake.sh configure
 ```
 
 Sau pe Windows cu GCC folosind Git Bash:
+
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja
 # sau ./scripts/cmake.sh configure -g Ninja
 ```
 
 Pentru a configura cu ASan, avem opțiunea `-DUSE_ASAN=ON` (nu merge pe Windows cu GCC):
+
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DUSE_ASAN=ON
 # sau ./scripts/cmake.sh configure -e "-DUSE_ASAN=ON"
 ```
 
-
 La acest pas putem cere să generăm fișiere de proiect pentru diverse medii de lucru.
 
+1. Pasul de compilare
 
-2. Pasul de compilare
 ```sh
 cmake --build build --config Debug --parallel 6
 # sau ./scripts/cmake.sh build
@@ -130,8 +127,8 @@ cmake --build build --config Debug --parallel 6
 
 Cu opțiunea `parallel` specificăm numărul de fișiere compilate în paralel.
 
+1. Pasul de instalare (opțional)
 
-3. Pasul de instalare (opțional)
 ```sh
 cmake --install build --config Debug --prefix install_dir
 # sau ./scripts/cmake.sh install
@@ -141,7 +138,6 @@ Vezi și [`scripts/cmake.sh`](scripts/cmake.sh).
 
 Observație: folderele `build/` și `install_dir/` sunt adăugate în fișierul `.gitignore` deoarece
 conțin fișiere generate și nu ne ajută să le versionăm.
-
 
 ## Instrucțiuni pentru a rula executabilul
 
@@ -153,13 +149,13 @@ Există mai multe variante:
 ./build/oop
 ```
 
-2. Din directorul `install_dir`. Executabilul se află la locația `./install_dir/bin/oop` după ce a fost rulat pasul de instalare (`./scripts/cmake.sh install` - pasul 3 de mai sus).
+1. Din directorul `install_dir`. Executabilul se află la locația `./install_dir/bin/oop` după ce a fost rulat pasul de instalare (`./scripts/cmake.sh install` - pasul 3 de mai sus).
 
 ```sh
 ./install_dir/bin/oop
 ```
 
-3. Rularea programului folosind Valgrind se poate face executând script-ul `./scripts/run_valgrind.sh` din rădăcina proiectului. Pe Windows acest script se poate rula folosind WSL (Windows Subsystem for Linux). Valgrind se poate rula în modul interactiv folosind: `RUN_INTERACTIVE=true ./scripts/run_valgrind.sh`
+1. Rularea programului folosind Valgrind se poate face executând script-ul `./scripts/run_valgrind.sh` din rădăcina proiectului. Pe Windows acest script se poate rula folosind WSL (Windows Subsystem for Linux). Valgrind se poate rula în modul interactiv folosind: `RUN_INTERACTIVE=true ./scripts/run_valgrind.sh`
 
 Implicit, nu se rulează interactiv, iar datele pentru `std::cin` sunt preluate din fișierul `tastatura.txt`.
 
@@ -169,7 +165,7 @@ RUN_INTERACTIVE=true ./scripts/run_valgrind.sh
 ./scripts/run_valgrind.sh
 ```
 
-4. Pentru a rula executabilul folosind ASan, este nevoie ca la pasul de configurare (vezi mai sus) să fie activat acest sanitizer. Ar trebui să meargă pe macOS și Linux. Pentru Windows, ar merge doar cu MSVC (nerecomandat).
+1. Pentru a rula executabilul folosind ASan, este nevoie ca la pasul de configurare (vezi mai sus) să fie activat acest sanitizer. Ar trebui să meargă pe macOS și Linux. Pentru Windows, ar merge doar cu MSVC (nerecomandat).
 
 Comanda este aceeași ca la pasul 1 sau 2. Nu merge combinat cu Valgrind.
 

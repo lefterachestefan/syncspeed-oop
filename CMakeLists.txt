@@ -54,7 +54,14 @@ add_executable(${MAIN_EXECUTABLE_NAME}
 )
 target_sources(${MAIN_EXECUTABLE_NAME}
     PRIVATE
-        src/Example.cpp
+        src/File.cpp
+        src/Directory.cpp
+        src/Network.cpp
+        src/SyncSession.cpp
+        src/SyncAction.cpp
+        src/Watcher.cpp
+        src/SyncedFolder.cpp
+        src/Device.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
