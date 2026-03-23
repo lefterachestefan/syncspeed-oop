@@ -1,6 +1,8 @@
+#ifdef __linux__
 #include <poll.h>
 #include <sys/inotify.h>
 #include <unistd.h>
+#endif
 
 #include <iostream>
 #include <stdexcept>
@@ -9,21 +11,26 @@
 #include "Watcher.h"
 
 DirectoryWatcher::DirectoryWatcher(std::filesystem::path path)
-	: root_path(std::move(path)), running(false) {
+	: inotify_fd(-1), root_path(std::move(path)), running(false) {
+#ifdef __linux__
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
 		throw std::runtime_error("Failed to initialize inotify");
 	}
+#endif
 }
 
 DirectoryWatcher::~DirectoryWatcher() {
 	stop();
+#ifdef __linux__
 	if (inotify_fd >= 0) {
 		close(inotify_fd);
 	}
+#endif
 }
 
-void DirectoryWatcher::add_watches_recursive(const std::filesystem::path& path) {
+void DirectoryWatcher::add_watches_recursive([[maybe_unused]] const std::filesystem::path& path) {
+#ifdef __linux__
 	int wd = inotify_add_watch(inotify_fd, path.c_str(),
 							   IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO);
 	if (wd >= 0) {
@@ -37,9 +44,11 @@ void DirectoryWatcher::add_watches_recursive(const std::filesystem::path& path) 
 			}
 		}
 	}
+#endif
 }
 
-void DirectoryWatcher::watch_loop(std::function<void()> on_change) {
+void DirectoryWatcher::watch_loop([[maybe_unused]] std::function<void()> on_change) {
+#ifdef __linux__
 	const size_t buf_size = 4096;
 	char buffer[buf_size];
 
@@ -82,6 +91,7 @@ void DirectoryWatcher::watch_loop(std::function<void()> on_change) {
 			}
 		}
 	}
+#endif
 }
 
 void DirectoryWatcher::start(std::function<void()> on_change) {
