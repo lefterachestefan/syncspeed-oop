@@ -24,7 +24,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 #elif defined(__APPLE__) || defined(__MACH__)
 	std::cout << "macOS is not yet implemented\n";
 	return 0;
-#else // Linux
+#else  // Linux
 
 	if (argc < 2) {
 		std::cout << "Usage:\n";

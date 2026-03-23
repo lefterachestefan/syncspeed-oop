@@ -1,5 +1,11 @@
 # Syncspeed
 
+Sync your files across devices!
+
+Usage:
+build/oop server <port> <folder>
+build/oop client <ip> <port> <folder>
+
 ### Important
 
 Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar dacă documentați riguros acest proces.

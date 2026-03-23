@@ -168,7 +168,8 @@ std::expected<NetworkConnection, std::string> NetworkServer::accept_connection()
 #ifdef __linux__
 	sockaddr_in client_addr{};
 	socklen_t client_len = sizeof(client_addr);
-	int client_fd = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len);
+	int client_fd =
+		accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len);
 	if (client_fd < 0) {
 		return std::unexpected<std::string>("Accept failed: " + std::string(strerror(errno)));
 	}

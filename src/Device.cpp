@@ -38,8 +38,8 @@ Device::SyncException Device::sync_folder(const std::filesystem::path& folder_pa
 }
 
 /*
-Device::UnsyncException Device::unsync_folder(const std::filesystem::path& folder_path) { // Currently unused
-	auto it = std::find_if(folders.begin(), folders.end(),
+Device::UnsyncException Device::unsync_folder(const std::filesystem::path& folder_path) { //
+Currently unused auto it = std::find_if(folders.begin(), folders.end(),
 						   [&folder_path](const auto& f) { return f.get_path() == folder_path; });
 
 	if (it == folders.end()) {
