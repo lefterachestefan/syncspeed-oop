@@ -9,13 +9,13 @@
 #include <thread>
 
 class DirectoryWatcher {
-	int inotify_fd;
+	[[maybe_unused]] int inotify_fd;
 	std::filesystem::path root_path;
 	std::atomic<bool> running;
 	std::thread watch_thread;
 
 	// Map watch descriptor to path to reconstruct full paths
-	std::map<int, std::filesystem::path> wd_to_path;
+	[[maybe_unused]] std::map<int, std::filesystem::path> wd_to_path;
 
 	void add_watches_recursive(const std::filesystem::path& path);
 	void watch_loop(std::function<void()> on_change);
