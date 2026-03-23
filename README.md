@@ -11,6 +11,10 @@ Demo:
 
 https://github.com/user-attachments/assets/28805cf4-48fb-4fc5-b1a1-1794f9a3d454
 
+future work:
+- [ ] support windows and macos
+- [ ] two way sync
+- [ ] interface 
 
 ---
 
