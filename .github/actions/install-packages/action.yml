@@ -11,6 +11,9 @@ runs:
       run: |
         sudo apt-get update
         sudo apt-get install ninja-build
+        if [[ "${{ matrix.c }}" == *"clang-18"* ]]; then
+          sudo apt-get install -y libc++-18-dev libc++abi-18-dev libunwind-18-dev
+        fi
 
     - name: Install valgrind
       shell: bash
