@@ -1,7 +1,9 @@
+#ifdef __linux__
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#endif
 
 #include <cerrno>
 #include <cstring>
@@ -16,9 +18,11 @@
 NetworkConnection::NetworkConnection(int fd) : socket_fd(fd) {}
 
 NetworkConnection::~NetworkConnection() {
+#ifdef __linux__
 	if (socket_fd >= 0) {
 		close(socket_fd);
 	}
+#endif
 }
 
 NetworkConnection::NetworkConnection(NetworkConnection&& other) noexcept
@@ -28,16 +32,20 @@ NetworkConnection::NetworkConnection(NetworkConnection&& other) noexcept
 
 NetworkConnection& NetworkConnection::operator=(NetworkConnection&& other) noexcept {
 	if (this != &other) {
+#ifdef __linux__
 		if (socket_fd >= 0) {
 			close(socket_fd);
 		}
+#endif
 		socket_fd = other.socket_fd;
 		other.socket_fd = -1;
 	}
 	return *this;
 }
 
-std::expected<void, std::string> NetworkConnection::send_exact(const void* data, size_t len) {
+std::expected<void, std::string> NetworkConnection::send_exact([[maybe_unused]] const void* data,
+															   [[maybe_unused]] size_t len) {
+#ifdef __linux__
 	const char* ptr = static_cast<const char*>(data);
 	size_t bytes_sent = 0;
 	while (bytes_sent < len) {
@@ -48,9 +56,14 @@ std::expected<void, std::string> NetworkConnection::send_exact(const void* data,
 		bytes_sent += ret;
 	}
 	return {};
+#else
+	return std::unexpected<std::string>("Not implemented on this platform");
+#endif
 }
 
-std::expected<void, std::string> NetworkConnection::recv_exact(void* data, size_t len) {
+std::expected<void, std::string> NetworkConnection::recv_exact([[maybe_unused]] void* data,
+															   [[maybe_unused]] size_t len) {
+#ifdef __linux__
 	char* ptr = static_cast<char*>(data);
 	size_t bytes_recv = 0;
 	while (bytes_recv < len) {
@@ -64,6 +77,9 @@ std::expected<void, std::string> NetworkConnection::recv_exact(void* data, size_
 		bytes_recv += ret;
 	}
 	return {};
+#else
+	return std::unexpected<std::string>("Not implemented on this platform");
+#endif
 }
 
 std::expected<void, std::string> NetworkConnection::send_string(const std::string& str) {
@@ -110,22 +126,27 @@ void NetworkConnection::close_connection() {
 
 // --- NetworkServer ---
 
-NetworkServer::NetworkServer() {
+NetworkServer::NetworkServer() : server_fd(-1) {
+#ifdef __linux__
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0) {
 		throw std::runtime_error("failed to create server socket: " + std::string(strerror(errno)));
 	}
 	int opt = 1;
 	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+#endif
 }
 
 NetworkServer::~NetworkServer() {
+#ifdef __linux__
 	if (server_fd >= 0) {
 		close(server_fd);
 	}
+#endif
 }
 
-std::expected<void, std::string> NetworkServer::bind_and_listen(uint16_t port) {
+std::expected<void, std::string> NetworkServer::bind_and_listen([[maybe_unused]] uint16_t port) {
+#ifdef __linux__
 	sockaddr_in addr{};
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
@@ -138,9 +159,13 @@ std::expected<void, std::string> NetworkServer::bind_and_listen(uint16_t port) {
 		return std::unexpected<std::string>("Listen failed: " + std::string(strerror(errno)));
 	}
 	return {};
+#else
+	return std::unexpected<std::string>("Not implemented on this platform");
+#endif
 }
 
 std::expected<NetworkConnection, std::string> NetworkServer::accept_connection() {
+#ifdef __linux__
 	sockaddr_in client_addr{};
 	socklen_t client_len = sizeof(client_addr);
 	int client_fd = accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len);
@@ -148,6 +173,9 @@ std::expected<NetworkConnection, std::string> NetworkServer::accept_connection()
 		return std::unexpected<std::string>("Accept failed: " + std::string(strerror(errno)));
 	}
 	return NetworkConnection(client_fd);
+#else
+	return std::unexpected<std::string>("Not implemented on this platform");
+#endif
 }
 
 std::ostream& operator<<(std::ostream& os, const NetworkServer& server) {
@@ -158,16 +186,19 @@ std::ostream& operator<<(std::ostream& os, const NetworkServer& server) {
 // bool NetworkServer::is_listening() const { return server_fd >= 0; } // Currently unused
 
 void NetworkServer::stop() {
+#ifdef __linux__
 	if (server_fd >= 0) {
 		close(server_fd);
 		server_fd = -1;
 	}
+#endif
 }
 
 // --- NetworkClient ---
 
-std::expected<NetworkConnection, std::string> NetworkClient::connect_to(const std::string& ip,
-																		uint16_t port) {
+std::expected<NetworkConnection, std::string> NetworkClient::connect_to(
+	[[maybe_unused]] const std::string& ip, [[maybe_unused]] uint16_t port) {
+#ifdef __linux__
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock < 0) {
 		return std::unexpected<std::string>("Socket creation failed: " +
@@ -187,6 +218,9 @@ std::expected<NetworkConnection, std::string> NetworkClient::connect_to(const st
 		return std::unexpected<std::string>("Connection Failed: " + std::string(strerror(errno)));
 	}
 	return NetworkConnection(sock);
+#else
+	return std::unexpected<std::string>("Not implemented on this platform");
+#endif
 }
 
 /*
