@@ -7,6 +7,11 @@ Usage:
 - oop server <port> <folder>
 - oop client <ip> <port> <folder>
 
+Demo:
+
+https://github.com/user-attachments/assets/28805cf4-48fb-4fc5-b1a1-1794f9a3d454
+
+
 ---
 
 ### Important
