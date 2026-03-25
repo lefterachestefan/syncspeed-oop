@@ -34,8 +34,8 @@ std::expected<File, FileError> File::try_create(const std::filesystem::path& pat
 		return std::unexpected<FileError>(FileError::Unknown);
 	}
 
-	std::string contents((std::istreambuf_iterator<char>(stream)),
-						 std::istreambuf_iterator<char>());
+	const std::string contents((std::istreambuf_iterator<char>(stream)),
+							   std::istreambuf_iterator<char>());
 
 	auto hash_value = std::hash<std::string>{}(contents);
 
@@ -67,8 +67,8 @@ void File::serialize(std::ostream& os) const {
 
 std::expected<File, FileError> File::deserialize(std::istream& is,
 												 const std::filesystem::path& base_path) {
-	std::string filename = SerializeUtils::read_string(is);
-	std::string hash_val = SerializeUtils::read_string(is);
+	const std::string filename = SerializeUtils::read_string(is);
+	const std::string hash_val = SerializeUtils::read_string(is);
 	if (!is) {
 		return std::unexpected<FileError>(FileError::Unknown);
 	}

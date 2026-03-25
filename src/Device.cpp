@@ -11,7 +11,7 @@ Device::Device(std::string device_id) : device_id(std::move(device_id)) {
 
 std::expected<void, FileError> Device::rescan() {
 	for (auto& folder : folders) {
-		auto result = folder.rescan();
+		const auto result = folder.rescan();
 		if (!result) {
 			return result;
 		}

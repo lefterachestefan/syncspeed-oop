@@ -14,15 +14,13 @@
 #include "include/Watcher.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
-	// test_rule_of_three();
-
 #if defined(_WIN32) || defined(_WIN64)
 	std::cout << "Windows is not yet implemented\n";
 	return 0;
 #elif defined(__APPLE__) || defined(__MACH__)
 	std::cout << "macOS is not yet implemented\n";
 	return 0;
-#else  // Linux
+#else  // Linux (hopefully)
 
 	if (argc < 2) {
 		std::cout << "Usage:\n";
@@ -57,7 +55,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 		return 0;
 	}
 
-	// Original logic adapted to new classes
 	if (mode == "server") {
 		if (argc < 4) {
 			return 1;

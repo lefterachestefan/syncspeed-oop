@@ -64,7 +64,7 @@ std::expected<void, std::string> NetworkConnection::send_exact([[maybe_unused]] 
 std::expected<void, std::string> NetworkConnection::recv_exact([[maybe_unused]] void* data,
 															   [[maybe_unused]] size_t len) const {
 #ifdef __linux__
-	char* ptr = static_cast<char*>(data);
+	char* const ptr = static_cast<char*>(data);
 	size_t bytes_recv = 0;
 	while (bytes_recv < len) {
 		ssize_t ret = recv(socket_fd, ptr + bytes_recv, len - bytes_recv, 0);
@@ -83,7 +83,7 @@ std::expected<void, std::string> NetworkConnection::recv_exact([[maybe_unused]] 
 }
 
 std::expected<void, std::string> NetworkConnection::send_string(const std::string& str) const {
-	uint64_t len = str.size();
+	const uint64_t len = str.size();
 	auto res = send_exact(&len, sizeof(len));
 	if (!res) {
 		return res;
@@ -132,7 +132,7 @@ NetworkServer::NetworkServer() : server_fd(-1) {
 	if (server_fd < 0) {
 		throw std::runtime_error("failed to create server socket: " + std::string(strerror(errno)));
 	}
-	int opt = 1;
+	const int opt = 1;
 	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 #endif
 }
@@ -169,7 +169,7 @@ std::expected<NetworkConnection, std::string> NetworkServer::accept_connection()
 #ifdef __linux__
 	sockaddr_in client_addr{};
 	socklen_t client_len = sizeof(client_addr);
-	int client_fd =
+	const int client_fd =
 		accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len);
 	if (client_fd < 0) {
 		return std::unexpected<std::string>("Accept failed: " + std::string(strerror(errno)));
@@ -201,7 +201,7 @@ void NetworkServer::stop() {
 std::expected<NetworkConnection, std::string> NetworkClient::connect_to(
 	[[maybe_unused]] const std::string& ip, [[maybe_unused]] uint16_t port) {
 #ifdef __linux__
-	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	const int sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock < 0) {
 		return std::unexpected<std::string>("Socket creation failed: " +
 											std::string(strerror(errno)));

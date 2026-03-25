@@ -9,7 +9,7 @@ SyncedFolder::SyncedFolder(std::filesystem::path path) : path(std::move(path)) {
 std::expected<SyncedFolder, SyncDirectoryError> SyncedFolder::try_create(
 	const std::filesystem::path& path) {
 	auto incomplete = SyncedFolder(path);
-	auto res = incomplete.rescan();
+	const auto res = incomplete.rescan();
 	if (!res) {
 		return std::unexpected<SyncDirectoryError>(SyncDirectoryError::BadPermissions);
 	}

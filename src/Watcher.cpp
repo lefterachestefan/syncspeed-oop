@@ -32,8 +32,8 @@ DirectoryWatcher::~DirectoryWatcher() {
 // NOLINTNEXTLINE(misc-no-recursion)
 void DirectoryWatcher::add_watches_recursive([[maybe_unused]] const std::filesystem::path& path) {
 #ifdef __linux__
-	int wd = inotify_add_watch(inotify_fd, path.c_str(),
-							   IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO);
+	const int wd = inotify_add_watch(
+		inotify_fd, path.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO);
 	if (wd >= 0) {
 		wd_to_path[wd] = path;
 	}
@@ -67,18 +67,18 @@ void DirectoryWatcher::watch_loop([[maybe_unused]] const std::function<void()>& 
 		}
 
 		if (pfd.revents & POLLIN) {
-			ssize_t len = read(inotify_fd, buffer, buf_size);
+			const ssize_t len = read(inotify_fd, buffer, buf_size);
 			if (len < 0) {
 				continue;
 			}
 
 			bool triggers_change = false;
-			for (char* ptr = buffer; ptr < buffer + len;) {
+			for (const char* ptr = buffer; ptr < buffer + len;) {
 				const auto* event = reinterpret_cast<const struct inotify_event*>(ptr);
 				ptr += sizeof(struct inotify_event) + event->len;
 
 				if (event->len > 0) {
-					std::string name(event->name);
+					const std::string name(event->name);
 					if (!name.ends_with(".conflict")) {
 						triggers_change = true;
 					}

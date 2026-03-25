@@ -30,13 +30,13 @@ std::expected<Directory, FileError> Directory::try_create(const std::filesystem:
 			if (!file) {
 				return std::unexpected<FileError>(file.error());
 			}
-			children.push_back(std::move(*file));
+			children.emplace_back(std::move(*file));
 		} else if (x.is_directory()) {
 			auto subdir = Directory::try_create(x.path());
 			if (!subdir) {
 				return std::unexpected<FileError>(subdir.error());
 			}
-			children.push_back(std::move(*subdir));
+			children.emplace_back(std::move(*subdir));
 		}
 	}
 	return dir;
@@ -44,7 +44,7 @@ std::expected<Directory, FileError> Directory::try_create(const std::filesystem:
 
 Directory Directory::create_remote(const std::filesystem::path& path,
 								   std::vector<std::variant<Directory, File>> children) {
-	return Directory(path, std::move(children));
+	return {path, std::move(children)};
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
@@ -53,13 +53,11 @@ void Directory::serialize(std::ostream& os) const {
 	size_t num_children = children.size();
 	os.write(reinterpret_cast<const char*>(&num_children), sizeof(num_children));
 	for (const auto& child : children) {
-		if (std::holds_alternative<Directory>(child)) {
-			bool is_dir = true;
-			os.write(reinterpret_cast<const char*>(&is_dir), sizeof(is_dir));
+		bool is_dir = std::holds_alternative<Directory>(child);
+		os.write(reinterpret_cast<const char*>(&is_dir), sizeof(is_dir));
+		if (is_dir) {
 			std::get<Directory>(child).serialize(os);
 		} else {
-			bool is_dir = false;
-			os.write(reinterpret_cast<const char*>(&is_dir), sizeof(is_dir));
 			std::get<File>(child).serialize(os);
 		}
 	}
@@ -67,7 +65,7 @@ void Directory::serialize(std::ostream& os) const {
 // NOLINTNEXTLINE(misc-no-recursion)
 std::expected<Directory, FileError> Directory::deserialize(std::istream& is,
 														   const std::filesystem::path& base_path) {
-	std::string filename = SerializeUtils::read_string(is);
+	const std::string filename = SerializeUtils::read_string(is);
 	size_t num_children = 0;
 	is.read(reinterpret_cast<char*>(&num_children), sizeof(num_children));
 	if (!is) {
@@ -75,7 +73,7 @@ std::expected<Directory, FileError> Directory::deserialize(std::istream& is,
 	}
 
 	std::vector<std::variant<Directory, File>> children;
-	auto new_path = base_path / filename;
+	const auto new_path = base_path / filename;
 	for (size_t i = 0; i < num_children; ++i) {
 		bool is_dir = false;
 		is.read(reinterpret_cast<char*>(&is_dir), sizeof(is_dir));
@@ -84,17 +82,17 @@ std::expected<Directory, FileError> Directory::deserialize(std::istream& is,
 		}
 
 		if (is_dir) {
-			auto dir = Directory::deserialize(is, new_path);
+			const auto dir = Directory::deserialize(is, new_path);
 			if (!dir) {
 				return std::unexpected<FileError>(dir.error());
 			}
-			children.emplace_back(std::move(*dir));
+			children.emplace_back(*dir);
 		} else {
-			auto file = File::deserialize(is, new_path);
+			const auto file = File::deserialize(is, new_path);
 			if (!file) {
 				return std::unexpected<FileError>(file.error());
 			}
-			children.emplace_back(std::move(*file));
+			children.emplace_back(*file);
 		}
 	}
 	return create_remote(new_path, std::move(children));
