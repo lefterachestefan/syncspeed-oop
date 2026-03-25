@@ -13,7 +13,7 @@
 #include "include/SyncSession.h"
 #include "include/Watcher.h"
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
+int main([[maybe_unused]] const int argc, [[maybe_unused]] const char** argv) {
 #if defined(_WIN32) || defined(_WIN64)
 	std::cout << "Windows is not yet implemented\n";
 	return 0;
@@ -30,15 +30,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 		return 0;
 	}
 
-	std::string mode = argv[1];
+	const std::string mode = argv[1];
 
 	if (mode == "info") {
 		if (argc < 3) {
 			std::cerr << "Usage: " << argv[0] << " info <folder>\n";
 			return 1;
 		}
-		std::filesystem::path folder = argv[2];
-		auto dir_res = Directory::try_create(folder);
+		const std::filesystem::path folder = argv[2];
+		const auto dir_res = Directory::try_create(folder);
 		if (!dir_res) {
 			std::cerr << "Error reading directory\n";
 			return 1;
@@ -48,7 +48,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 		std::cout << "Subdirs: " << dir_res->count_directories() << "\n";
 
 		Device dev("local-device");
-		auto sync_res = dev.sync_folder(folder);
+		const auto sync_res = dev.sync_folder(folder);
 		if (sync_res) {
 			std::cout << "Device status: " << dev << "\n";
 		}
@@ -59,12 +59,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 		if (argc < 4) {
 			return 1;
 		}
-		uint16_t port = std::stoi(argv[2]);
-		std::filesystem::path folder = argv[3];
+		const uint16_t port = std::stoi(argv[2]);
+		const std::filesystem::path folder = argv[3];
 		std::filesystem::create_directories(folder);
 
-		NetworkServer server;
-		auto res = server.bind_and_listen(port);
+		const NetworkServer server;
+		const auto res = server.bind_and_listen(port);
 		if (!res) {
 			std::cerr << "Server error: " << res.error() << "\n";
 			return 1;
@@ -73,13 +73,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
 		SyncSession session(folder);
 		while (true) {
-			auto client_res = server.accept_connection();
+			const auto client_res = server.accept_connection();
 			if (!client_res) {
 				std::cerr << "Accept error: " << client_res.error() << "\n";
 				continue;
 			}
 			std::cout << "Client connected: " << *client_res << "\n";
-			auto sync_res = session.run_server_side(*client_res);
+			const auto sync_res = session.run_server_side(*client_res);
 			if (!sync_res) {
 				std::cerr << "Sync session failed: " << sync_res.error() << "\n";
 			} else {
@@ -90,9 +90,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 		if (argc < 5) {
 			return 1;
 		}
-		std::string ip = argv[2];
-		uint16_t port = std::stoi(argv[3]);
-		std::filesystem::path folder = argv[4];
+		const std::string ip = argv[2];
+		const uint16_t port = std::stoi(argv[3]);
+		const std::filesystem::path folder = argv[4];
 		std::filesystem::create_directories(folder);
 
 		DirectoryWatcher watcher(folder);
@@ -117,11 +117,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
 			if (should_sync) {
 				std::cout << "Changes detected. Connecting to " << ip << ":" << port << "...\n";
-				auto conn_res = NetworkClient::connect_to(ip, port);
+				const auto conn_res = NetworkClient::connect_to(ip, port);
 				if (!conn_res) {
 					std::cerr << "Client connection error: " << conn_res.error() << "\n";
 				} else {
-					auto sync_res = session.run_client_side(*conn_res);
+					const auto sync_res = session.run_client_side(*conn_res);
 					if (!sync_res) {
 						std::cerr << "Sync failed: " << sync_res.error() << "\n";
 					} else {
