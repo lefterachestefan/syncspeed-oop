@@ -19,11 +19,11 @@ class NetworkConnection {
 	NetworkConnection(NetworkConnection&& other) noexcept;
 	NetworkConnection& operator=(NetworkConnection&& other) noexcept;
 
-	std::expected<void, std::string> send_exact(const void* data, size_t len);
-	std::expected<void, std::string> recv_exact(void* data, size_t len);
+	std::expected<void, std::string> send_exact(const void* data, size_t len) const;
+	std::expected<void, std::string> recv_exact(void* data, size_t len) const;
 
-	std::expected<void, std::string> send_string(const std::string& str);
-	std::expected<std::string, std::string> recv_string();
+	std::expected<void, std::string> send_string(const std::string& str) const;
+	std::expected<std::string, std::string> recv_string() const;
 
 	// [[nodiscard]] int get_fd() const { return socket_fd; } // Currently unused
 
@@ -40,8 +40,8 @@ class NetworkServer {
 	NetworkServer();
 	~NetworkServer();
 
-	std::expected<void, std::string> bind_and_listen(uint16_t port);
-	std::expected<NetworkConnection, std::string> accept_connection();
+	std::expected<void, std::string> bind_and_listen(uint16_t port) const;
+	std::expected<NetworkConnection, std::string> accept_connection() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const NetworkServer& server);
 

@@ -29,6 +29,7 @@ DirectoryWatcher::~DirectoryWatcher() {
 #endif
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
 void DirectoryWatcher::add_watches_recursive([[maybe_unused]] const std::filesystem::path& path) {
 #ifdef __linux__
 	int wd = inotify_add_watch(inotify_fd, path.c_str(),
@@ -47,12 +48,12 @@ void DirectoryWatcher::add_watches_recursive([[maybe_unused]] const std::filesys
 #endif
 }
 
-void DirectoryWatcher::watch_loop([[maybe_unused]] std::function<void()> on_change) {
+void DirectoryWatcher::watch_loop([[maybe_unused]] const std::function<void()>& on_change) {
 #ifdef __linux__
 	const size_t buf_size = 4096;
 	char buffer[buf_size];
 
-	struct pollfd pfd;
+	struct pollfd pfd{};
 	pfd.fd = inotify_fd;
 	pfd.events = POLLIN;
 
@@ -94,7 +95,7 @@ void DirectoryWatcher::watch_loop([[maybe_unused]] std::function<void()> on_chan
 #endif
 }
 
-void DirectoryWatcher::start(std::function<void()> on_change) {
+void DirectoryWatcher::start(const std::function<void()>& on_change) {
 	if (running) {
 		return;
 	}

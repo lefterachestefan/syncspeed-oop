@@ -9,7 +9,8 @@ namespace SerializeUtils {
 inline void write_string(std::ostream& os, const std::string& str) {
 	size_t len = str.size();
 	os.write(reinterpret_cast<const char*>(&len), sizeof(len));
-	os.write(str.data(), len);
+	// TODO: check later for all CPU's if this conversion to long is okay
+	os.write(str.data(), (long)len);
 }
 
 inline std::string read_string(std::istream& is) {
@@ -19,7 +20,8 @@ inline std::string read_string(std::istream& is) {
 		return "";
 	}
 	std::string str(len, '\0');
-	is.read(str.data(), len);
+	// TODO: check later for all CPU's if this conversion to long is okay
+	is.read(str.data(), (long)len);
 	return str;
 }
 

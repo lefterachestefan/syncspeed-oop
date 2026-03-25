@@ -17,6 +17,7 @@ const std::vector<std::variant<Directory, File>>& Directory::get_children() cons
 	return children;
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
 std::expected<Directory, FileError> Directory::try_create(const std::filesystem::path& path) {
 	auto dir = Directory(path);
 	auto& children = dir.children;
@@ -46,6 +47,7 @@ Directory Directory::create_remote(const std::filesystem::path& path,
 	return Directory(path, std::move(children));
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
 void Directory::serialize(std::ostream& os) const {
 	SerializeUtils::write_string(os, path.filename().string());
 	size_t num_children = children.size();
@@ -62,7 +64,7 @@ void Directory::serialize(std::ostream& os) const {
 		}
 	}
 }
-
+// NOLINTNEXTLINE(misc-no-recursion)
 std::expected<Directory, FileError> Directory::deserialize(std::istream& is,
 														   const std::filesystem::path& base_path) {
 	std::string filename = SerializeUtils::read_string(is);

@@ -44,7 +44,7 @@ NetworkConnection& NetworkConnection::operator=(NetworkConnection&& other) noexc
 }
 
 std::expected<void, std::string> NetworkConnection::send_exact([[maybe_unused]] const void* data,
-															   [[maybe_unused]] size_t len) {
+															   [[maybe_unused]] size_t len) const {
 #ifdef __linux__
 	const char* ptr = static_cast<const char*>(data);
 	size_t bytes_sent = 0;
@@ -62,7 +62,7 @@ std::expected<void, std::string> NetworkConnection::send_exact([[maybe_unused]] 
 }
 
 std::expected<void, std::string> NetworkConnection::recv_exact([[maybe_unused]] void* data,
-															   [[maybe_unused]] size_t len) {
+															   [[maybe_unused]] size_t len) const {
 #ifdef __linux__
 	char* ptr = static_cast<char*>(data);
 	size_t bytes_recv = 0;
@@ -82,7 +82,7 @@ std::expected<void, std::string> NetworkConnection::recv_exact([[maybe_unused]] 
 #endif
 }
 
-std::expected<void, std::string> NetworkConnection::send_string(const std::string& str) {
+std::expected<void, std::string> NetworkConnection::send_string(const std::string& str) const {
 	uint64_t len = str.size();
 	auto res = send_exact(&len, sizeof(len));
 	if (!res) {
@@ -91,7 +91,7 @@ std::expected<void, std::string> NetworkConnection::send_string(const std::strin
 	return send_exact(str.data(), len);
 }
 
-std::expected<std::string, std::string> NetworkConnection::recv_string() {
+std::expected<std::string, std::string> NetworkConnection::recv_string() const {
 	uint64_t len = 0;
 	auto res = recv_exact(&len, sizeof(len));
 	if (!res) {
@@ -145,7 +145,8 @@ NetworkServer::~NetworkServer() {
 #endif
 }
 
-std::expected<void, std::string> NetworkServer::bind_and_listen([[maybe_unused]] uint16_t port) {
+std::expected<void, std::string> NetworkServer::bind_and_listen(
+	[[maybe_unused]] uint16_t port) const {
 #ifdef __linux__
 	sockaddr_in addr{};
 	addr.sin_family = AF_INET;
@@ -164,7 +165,7 @@ std::expected<void, std::string> NetworkServer::bind_and_listen([[maybe_unused]]
 #endif
 }
 
-std::expected<NetworkConnection, std::string> NetworkServer::accept_connection() {
+std::expected<NetworkConnection, std::string> NetworkServer::accept_connection() const {
 #ifdef __linux__
 	sockaddr_in client_addr{};
 	socklen_t client_len = sizeof(client_addr);

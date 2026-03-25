@@ -42,6 +42,7 @@ std::ostream& operator<<(std::ostream& os, const SyncAction& sync_action) {
 
 namespace {
 
+// NOLINTNEXTLINE(misc-no-recursion)
 void add_all_local(const Directory& local, std::vector<SyncAction>& actions,
 				   const std::filesystem::path& current_relative) {
 	for (const auto& child : local.get_children()) {
@@ -58,6 +59,7 @@ void add_all_local(const Directory& local, std::vector<SyncAction>& actions,
 	}
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
 void compute_diff_impl(const Directory& local, const Directory& remote,
 					   std::vector<SyncAction>& actions,
 					   const std::filesystem::path& current_relative) {
@@ -115,6 +117,7 @@ void compute_diff_impl(const Directory& local, const Directory& remote,
 		auto next_relative = current_relative / name;
 		auto r_it = remote_files.find(name);
 		if (r_it != remote_files.end() && r_it->second->get_hash() != l_file->get_hash()) {
+			// TODO: right now any file diff is treated as conflict, check timestamp later
 			actions.emplace_back(Sync::ConflictFile{next_relative, r_it->second->get_hash()});
 		} else if (r_it == remote_files.end()) {
 			actions.emplace_back(Sync::UpdateFile{next_relative, l_file->get_hash()});

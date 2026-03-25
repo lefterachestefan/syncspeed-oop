@@ -58,7 +58,8 @@ std::expected<void, std::string> send_actions(NetworkConnection& conn,
 
 			std::filesystem::create_directories(target_path.parent_path());
 			std::ofstream ofs(target_path, std::ios::binary);
-			ofs.write(file_content_res->data(), file_content_res->size());
+			// TODO: check later for all CPU's if this conversion to long is okay
+			ofs.write(file_content_res->data(), (long)file_content_res->size());
 		}
 	}
 	auto res = conn.send_string("DONE_ACTIONS");
