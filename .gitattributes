@@ -1,4 +1,8 @@
 ext/** linguist-vendored
 * text=auto eol=lf
+
 cmake/* linguist-vendored
 cmake/ export-ignore
+
+scripts/* linguist-vendored
+scripts/ export-ignore
