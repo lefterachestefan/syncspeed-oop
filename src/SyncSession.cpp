@@ -69,7 +69,7 @@ std::expected<void, std::string> send_actions(const NetworkConnection& conn,
 	return {};
 }
 
-std::expected<void, std::string> serve_requests(NetworkConnection& conn,
+std::expected<void, std::string> serve_requests(const NetworkConnection& conn,
 												const std::filesystem::path& local_sync_folder) {
 	while (true) {
 		auto msg_res = conn.recv_string();
