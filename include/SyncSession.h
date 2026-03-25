@@ -14,8 +14,8 @@ class SyncSession {
    public:
 	explicit SyncSession(std::filesystem::path local_path);
 
-	std::expected<void, std::string> run_server_side(NetworkConnection& conn);
-	std::expected<void, std::string> run_client_side(NetworkConnection& conn);
+	std::expected<void, std::string> run_server_side(const NetworkConnection& conn);
+	std::expected<void, std::string> run_client_side(const NetworkConnection& conn);
 
 	// [[nodiscard]] const std::filesystem::path& get_local_path() const; // Currently unused
 

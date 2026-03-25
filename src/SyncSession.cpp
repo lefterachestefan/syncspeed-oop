@@ -103,7 +103,7 @@ std::expected<void, std::string> serve_requests(const NetworkConnection& conn,
 	return {};
 }
 
-std::expected<void, std::string> SyncSession::run_client_side(NetworkConnection& conn) {
+std::expected<void, std::string> SyncSession::run_client_side(const NetworkConnection& conn) {
 	// 1. Send Local Directory to Server
 	auto local_dir_res = Directory::try_create(local_sync_folder);
 	if (!local_dir_res) {
@@ -151,7 +151,7 @@ std::expected<void, std::string> SyncSession::run_client_side(NetworkConnection&
 	return {};
 }
 
-std::expected<void, std::string> SyncSession::run_server_side(NetworkConnection& conn) {
+std::expected<void, std::string> SyncSession::run_server_side(const NetworkConnection& conn) {
 	// 1. Receive Remote Directory from Client
 	auto rec_res = conn.recv_string();
 	if (!rec_res) {
