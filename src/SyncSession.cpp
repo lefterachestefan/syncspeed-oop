@@ -14,7 +14,7 @@ SyncSession::SyncSession(std::filesystem::path local_path)
 // const std::filesystem::path& SyncSession::get_local_path() const { return local_sync_folder; } //
 // Currently unused
 
-std::expected<void, std::string> send_actions(NetworkConnection& conn,
+std::expected<void, std::string> send_actions(const NetworkConnection& conn,
 											  const std::filesystem::path& local_sync_folder,
 											  const std::vector<SyncAction>& actions) {
 	for (const auto& sync_action : actions) {
