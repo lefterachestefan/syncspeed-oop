@@ -3,10 +3,23 @@
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#ifdef _MSC_VER
 #pragma comment(lib, "ws2_32.lib")
+#endif
 #define SHUT_RDWR SD_BOTH
 #define close closesocket
+
+#ifndef _SSIZE_T_DEFINED
+#define _SSIZE_T_DEFINED
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+using ssize_t = SSIZE_T;
+#elif defined(__MINGW32__)
+// MinGW already defines ssize_t in some headers, if not handled by _SSIZE_T_DEFINED
+#else
 using ssize_t = int;
+#endif
+#endif
 
 class WinsockInit {
    public:
