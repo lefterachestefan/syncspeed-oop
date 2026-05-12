@@ -256,7 +256,7 @@ void compute_diff_impl(const Directory& local, const Directory& remote,
 		const auto r_it = remote_files.find(name);
 		if (r_it != remote_files.end() && r_it->second->get_hash() != l_file->get_hash()) {
 			actions.emplace_back(
-				std::make_unique<ConflictFileAction>(next_relative, r_it->second->get_hash()));
+				std::make_unique<UpdateFileAction>(next_relative, l_file->get_hash()));
 		} else if (r_it == remote_files.end()) {
 			actions.emplace_back(
 				std::make_unique<UpdateFileAction>(next_relative, l_file->get_hash()));

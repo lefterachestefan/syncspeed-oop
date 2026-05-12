@@ -64,6 +64,9 @@ bool DirectoryWatcher::poll_changes() {
 
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(root_path)) {
 		if (entry.is_regular_file()) {
+			if (entry.path().extension() == ".conflict") {
+				continue;
+			}
 			current_times[entry.path()] = entry.last_write_time();
 		}
 	}

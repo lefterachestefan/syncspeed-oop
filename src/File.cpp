@@ -1,13 +1,24 @@
 #include <cassert>
+#include <cstdint>
 #include <expected>
 #include <fstream>
-#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
 #include "File.h"
 #include "SerializeUtils.h"
+
+namespace {
+uint64_t fnv1a_hash(const std::string& s) {
+	uint64_t hash = 0xcbf29ce484222325ULL;
+	for (unsigned char c : s) {
+		hash ^= c;
+		hash *= 0x100000001b3ULL;
+	}
+	return hash;
+}
+}  // namespace
 
 File::File(std::filesystem::path path) : path(std::move(path)) {}
 
@@ -37,10 +48,10 @@ std::expected<File, FileError> File::try_create(const std::filesystem::path& pat
 	const std::string contents((std::istreambuf_iterator<char>(stream)),
 							   std::istreambuf_iterator<char>());
 
-	auto hash_value = std::hash<std::string>{}(contents);
+	const uint64_t hash_value = fnv1a_hash(contents);
 
 	std::ostringstream hex_stream;
-	hex_stream << std::hex << std::setfill('0') << std::setw(sizeof(hash_value) * 2) << hash_value;
+	hex_stream << std::hex << std::setfill('0') << std::setw(16) << hash_value;
 
 	auto file = File(path);
 	file.hash = hex_stream.str();
