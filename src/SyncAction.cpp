@@ -138,6 +138,18 @@ void RenameAction::print(std::ostream& os) const {
 	os << "Rename(" << old_path << " -> " << new_path << ")";
 }
 
+// --- LogAction ---
+LogAction::LogAction(std::string msg) : message(std::move(msg)) {}
+std::unique_ptr<SyncAction> LogAction::clone() const { return std::make_unique<LogAction>(*this); }
+std::string LogAction::get_type_string() const { return "Log"; }
+std::filesystem::path LogAction::get_path() const { return {}; }
+std::expected<void, std::string> LogAction::execute(const NetworkConnection&,
+													const std::filesystem::path&) const {
+	fmt::print("[LOG]: {}\n", message);
+	return {};
+}
+void LogAction::print(std::ostream& os) const { os << "Log(" << message << ")"; }
+
 // --- ActionWrapper ---
 ActionWrapper::ActionWrapper(std::unique_ptr<SyncAction> act) : action(std::move(act)) {}
 ActionWrapper::ActionWrapper(const ActionWrapper& other)
@@ -234,6 +246,7 @@ void compute_diff_impl(const Directory& local, const Directory& remote,
 	for (const auto& [name, l_dir] : local_dirs) {
 		const auto next_relative = current_relative / name;
 		const auto r_it = remote_dirs.find(name);
+		actions.emplace_back(std::make_unique<LogAction>("Processing directory: " + name));
 		if (r_it == remote_dirs.end()) {
 			actions.emplace_back(std::make_unique<CreateDirAction>(next_relative));
 			add_all_local(*l_dir, actions, next_relative);

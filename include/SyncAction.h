@@ -124,6 +124,21 @@ class RenameAction : public SyncAction {
 	void print(std::ostream& os) const override;
 };
 
+class LogAction : public SyncAction {
+	std::string message;
+
+   public:
+	explicit LogAction(std::string msg);
+	[[nodiscard]] std::unique_ptr<SyncAction> clone() const override;
+	[[nodiscard]] std::string get_type_string() const override;
+	[[nodiscard]] std::filesystem::path get_path() const override;
+	[[nodiscard]] std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const override;
+
+   protected:
+	void print(std::ostream& os) const override;
+};
+
 // Class with pointer to base for T2 requirement
 class ActionWrapper {
 	std::unique_ptr<SyncAction> action;
