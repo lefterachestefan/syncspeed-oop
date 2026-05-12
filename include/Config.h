@@ -36,7 +36,6 @@ class Config {
 	}
 
 	[[nodiscard]] const std::string& get_device_name() const { return device_name; }
-	[[nodiscard]] uint16_t get_default_port() const { return default_port; }
 };
 
 #endif
