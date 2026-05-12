@@ -87,6 +87,9 @@ target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE
 				ext
 )
 target_link_libraries(${MAIN_EXECUTABLE_NAME} PRIVATE nlohmann_json::nlohmann_json fmt::fmt)
+if(WIN32)
+	target_link_libraries(${MAIN_EXECUTABLE_NAME} PRIVATE ws2_32)
+endif()
 
 ###############################################################################
 
