@@ -9,12 +9,13 @@ Usage:
 
 Demo:
 
-https://github.com/user-attachments/assets/28805cf4-48fb-4fc5-b1a1-1794f9a3d454
+<https://github.com/user-attachments/assets/28805cf4-48fb-4fc5-b1a1-1794f9a3d454>
 
 future work:
+
 - [ ] support windows and macos
 - [ ] two way sync
-- [ ] interface 
+- [ ] interface
 
 ---
 
@@ -67,18 +68,18 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 #### Cerințe
 
 - [x] separarea codului din clase în `.h` (sau `.hpp`) și `.cpp`
-- [ ] moșteniri:
-  - minim o clasă de bază și **3 clase derivate** din aceeași ierarhie; cele 3 derivate moștenesc aceeași clasă de bază
-  - ierarhia trebuie să fie cu bază proprie, nu derivată dintr-o clasă predefinită
-  - [ ] funcții virtuale (pure) apelate prin pointeri de bază din clasa care conține atributul de tip pointer de bază
-    - minim o funcție virtuală va fi **specifică temei** (i.e. nu simple citiri/afișări sau preluate din biblioteci i.e. draw/update/render)
-    - constructori virtuali (clone): sunt necesari, dar nu se consideră funcții specifice temei
-    - afișare virtuală, interfață non-virtuală
-  - [ ] apelarea constructorului din clasa de bază din constructori din derivate
-  - [ ] clasă cu atribut de tip pointer la o clasă de bază cu derivate; aici apelați funcțiile virtuale prin pointer de bază, eventual prin interfața non-virtuală din bază
-    - [ ] suprascris cc/op= pentru copieri/atribuiri corecte, copy and swap
-    - [ ] `dynamic_cast`/`std::dynamic_pointer_cast` pentru downcast cu sens
-    - [ ] smart pointers (recomandat, opțional)
+- [x] moșteniri:
+  - [x] minim o clasă de bază și **3 clase derivate** din aceeași ierarhie; cele 3 derivate moștenesc aceeași clasă de bază
+  - [x] ierarhia trebuie să fie cu bază proprie, nu derivată dintr-o clasă predefinită
+  - [x] funcții virtuale (pure) apelate prin pointeri de bază din clasa care conține atributul de tip pointer de bază
+    - [x] minim o funcție virtuală va fi **specifică temei** (i.e. nu simple citiri/afișări sau preluate din biblioteci i.e. draw/update/render)
+    - [x] constructori virtuali (clone): sunt necesari, dar nu se consideră funcții specifice temei
+    - [x] afișare virtuală, interfață non-virtuală
+  - [x] apelarea constructorului din clasa de bază din constructori din derivate
+  - [x] clasă cu atribut de tip pointer la o clasă de bază cu derivate; aici apelați funcțiile virtuale prin pointer de bază, eventual prin interfața non-virtuală din bază
+    - [x] suprascris cc/op= pentru copieri/atribuiri corecte, copy and swap
+    - [x] `dynamic_cast`/`std::dynamic_pointer_cast` pentru downcast cu sens
+    - [x] smart pointers (recomandat, opțional)
 - [x] excepții
   - [x] ierarhie proprie cu baza `std::exception` sau derivată din `std::exception`; minim **3** clase pentru erori specifice distincte
     - clasele de excepții trebuie să trateze categorii de erori distincte (exemplu de erori echivalente: citire fișiere cu diverse extensii)
@@ -86,7 +87,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
   - această ierarhie va fi complet independentă de ierarhia cu funcții virtuale
 - [x] funcții și atribute `static`
 - [x] STL
-- [ ] cât mai multe `const`
+- [x] cât mai multe `const`
 - [x] funcții _de nivel înalt_, de eliminat cât mai mulți getters/setters/funcții low-level
 - [x] minim 75-78% din codul propriu să fie C++
 - [ ] la sfârșit: commit separat cu adăugarea unei noi clase derivate fără a modifica restul codului, **pe lângă cele 3 derivate deja adăugate** din aceeași ierarhie

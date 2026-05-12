@@ -3,6 +3,8 @@
 #include <map>
 #include <utility>
 
+#include <fmt/core.h>
+
 #include "Directory.h"
 #include "SyncAction.h"
 
@@ -149,6 +151,15 @@ void swap(ActionWrapper& first, ActionWrapper& second) noexcept {
 	swap(first.action, second.action);
 }
 const SyncAction& ActionWrapper::get() const { return *action; }
+
+std::expected<void, std::string> ActionWrapper::execute(
+	const NetworkConnection& conn, const std::filesystem::path& base_path) const {
+	if (action) {
+		return action->execute(conn, base_path);
+	}
+	return {};
+}
+
 std::ostream& operator<<(std::ostream& os, const ActionWrapper& wrapper) {
 	if (wrapper.action) {
 		wrapper.action->display(os);
@@ -161,7 +172,7 @@ std::ostream& operator<<(std::ostream& os, const ActionWrapper& wrapper) {
 namespace {
 
 // NOLINTNEXTLINE(misc-no-recursion)
-void add_all_local(const Directory& local, std::vector<std::unique_ptr<SyncAction>>& actions,
+void add_all_local(const Directory& local, std::vector<ActionWrapper>& actions,
 				   const std::filesystem::path& current_relative) {
 	for (const auto& child : local.get_children()) {
 		if (std::holds_alternative<Directory>(child)) {
@@ -179,7 +190,7 @@ void add_all_local(const Directory& local, std::vector<std::unique_ptr<SyncActio
 
 // NOLINTNEXTLINE(misc-no-recursion)
 void compute_diff_impl(const Directory& local, const Directory& remote,
-					   std::vector<std::unique_ptr<SyncAction>>& actions,
+					   std::vector<ActionWrapper>& actions,
 					   const std::filesystem::path& current_relative) {
 	std::map<std::string, const Directory*> local_dirs;
 	std::map<std::string, const File*> local_files;
@@ -245,9 +256,8 @@ void compute_diff_impl(const Directory& local, const Directory& remote,
 
 }  // namespace
 
-std::vector<std::unique_ptr<SyncAction>> compute_diff(const Directory& local,
-													  const Directory& remote) {
-	std::vector<std::unique_ptr<SyncAction>> actions;
+std::vector<ActionWrapper> compute_diff(const Directory& local, const Directory& remote) {
+	std::vector<ActionWrapper> actions;
 	compute_diff_impl(local, remote, actions, std::filesystem::path{""});
 	return actions;
 }

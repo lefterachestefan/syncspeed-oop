@@ -9,6 +9,7 @@
 
 #include "Directory.h"
 #include "SyncAction.h"
+#include "SyncException.h"
 #include "SyncSession.h"
 
 SyncSession::SyncSession(std::filesystem::path local_path)
@@ -23,12 +24,12 @@ SyncSession::SyncSession(std::filesystem::path local_path)
 
 std::expected<void, std::string> send_actions(const NetworkConnection& conn,
 											  const std::filesystem::path& local_sync_folder,
-											  const std::vector<std::unique_ptr<SyncAction>>& actions) {
+											  const std::vector<ActionWrapper>& actions) {
 	for (const auto& sync_action : actions) {
-		if (dynamic_cast<const ConflictFileAction*>(sync_action.get()) != nullptr) {
-			fmt::print("Handling conflict for: {}\n", sync_action->get_path().string());
+		if (dynamic_cast<const ConflictFileAction*>(&sync_action.get()) != nullptr) {
+			fmt::print("Handling conflict for: {}\n", sync_action.get().get_path().string());
 		}
-		const auto res = sync_action->execute(conn, local_sync_folder);
+		const auto res = sync_action.execute(conn, local_sync_folder);
 		if (!res) {
 			return res;
 		}

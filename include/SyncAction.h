@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <expected>
 
 #include "Network.h"
 
@@ -137,11 +138,13 @@ class ActionWrapper {
 
 	[[nodiscard]] const SyncAction& get() const;
 
+	[[nodiscard]] std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const;
+
 	friend std::ostream& operator<<(std::ostream& os, const ActionWrapper& wrapper);
 };
 
 class Directory;
-std::vector<std::unique_ptr<SyncAction>> compute_diff(const Directory& local,
-													  const Directory& remote);
+std::vector<ActionWrapper> compute_diff(const Directory& local, const Directory& remote);
 
 #endif
