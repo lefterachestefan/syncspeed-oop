@@ -1,7 +1,7 @@
-#include "Device.h"
-
 #include <iostream>
 #include <utility>
+
+#include "Device.h"
 
 int Device::total_devices = 0;
 

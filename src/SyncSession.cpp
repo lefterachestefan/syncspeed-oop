@@ -1,11 +1,11 @@
+#include <fmt/core.h>
+#include <fmt/ostream.h>
+
 #include <expected>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <utility>
-
-#include <fmt/core.h>
-#include <fmt/ostream.h>
 
 #include "Directory.h"
 #include "SyncAction.h"

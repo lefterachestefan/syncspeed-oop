@@ -1,12 +1,12 @@
 #ifndef SYNCACTION_H
 #define SYNCACTION_H
 
+#include <expected>
 #include <filesystem>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
-#include <expected>
 
 #include "Network.h"
 
@@ -15,13 +15,11 @@ class SyncAction {
 	virtual ~SyncAction() = default;
 	[[nodiscard]] virtual std::unique_ptr<SyncAction> clone() const = 0;
 
-	// NVI
 	void display(std::ostream& os) const { print(os); }
 
 	[[nodiscard]] virtual std::string get_type_string() const = 0;
 	[[nodiscard]] virtual std::filesystem::path get_path() const = 0;
 
-	// Theme specific virtual function
 	[[nodiscard]] virtual std::expected<void, std::string> execute(
 		const NetworkConnection& conn, const std::filesystem::path& base_path) const = 0;
 
@@ -139,7 +137,7 @@ class LogAction : public SyncAction {
 	void print(std::ostream& os) const override;
 };
 
-// Class with pointer to base for T2 requirement
+// clasă cu atribut de tip pointer la o clasă de bază cu derivate
 class ActionWrapper {
 	std::unique_ptr<SyncAction> action;
 

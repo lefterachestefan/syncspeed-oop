@@ -76,7 +76,8 @@ std::expected<void, std::string> NetworkConnection::send_exact(const void* data,
 		ssize_t ret = send(socket_fd, ptr + bytes_sent, static_cast<int>(len - bytes_sent), 0);
 		if (ret < 0) {
 #if defined(_WIN32)
-			return std::unexpected<std::string>("send failed: " + std::to_string(WSAGetLastError()));
+			return std::unexpected<std::string>("send failed: " +
+												std::to_string(WSAGetLastError()));
 #else
 			return std::unexpected<std::string>("send failed: " + std::string(strerror(errno)));
 #endif
@@ -93,7 +94,8 @@ std::expected<void, std::string> NetworkConnection::recv_exact(void* data, size_
 		ssize_t ret = recv(socket_fd, ptr + bytes_recv, static_cast<int>(len - bytes_recv), 0);
 		if (ret < 0) {
 #if defined(_WIN32)
-			return std::unexpected<std::string>("recv failed: " + std::to_string(WSAGetLastError()));
+			return std::unexpected<std::string>("recv failed: " +
+												std::to_string(WSAGetLastError()));
 #else
 			return std::unexpected<std::string>("recv failed: " + std::string(strerror(errno)));
 #endif
@@ -192,8 +194,8 @@ std::expected<NetworkConnection, std::string> NetworkServer::accept_connection()
 #else
 	socklen_t client_len = sizeof(client_addr);
 #endif
-	const int client_fd =
-		static_cast<int>(accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len));
+	const int client_fd = static_cast<int>(
+		accept(server_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &client_len));
 	if (client_fd < 0) {
 #if defined(_WIN32)
 		return std::unexpected<std::string>("Accept failed: " + std::to_string(WSAGetLastError()));

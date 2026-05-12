@@ -1,9 +1,9 @@
+#include <fmt/core.h>
+
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <utility>
-
-#include <fmt/core.h>
 
 #include "Directory.h"
 #include "SyncAction.h"
@@ -15,14 +15,12 @@ std::unique_ptr<SyncAction> CreateDirAction::clone() const {
 }
 std::string CreateDirAction::get_type_string() const { return "CreateDir"; }
 std::filesystem::path CreateDirAction::get_path() const { return relative_path; }
-std::expected<void, std::string> CreateDirAction::execute(const NetworkConnection&,
-														  const std::filesystem::path& base_path) const {
+std::expected<void, std::string> CreateDirAction::execute(
+	const NetworkConnection&, const std::filesystem::path& base_path) const {
 	std::filesystem::create_directories(base_path / relative_path);
 	return {};
 }
-void CreateDirAction::print(std::ostream& os) const {
-	os << "CreateDir(" << relative_path << ")";
-}
+void CreateDirAction::print(std::ostream& os) const { os << "CreateDir(" << relative_path << ")"; }
 
 // --- DeleteDirAction ---
 DeleteDirAction::DeleteDirAction(std::filesystem::path path) : relative_path(std::move(path)) {}
@@ -31,14 +29,12 @@ std::unique_ptr<SyncAction> DeleteDirAction::clone() const {
 }
 std::string DeleteDirAction::get_type_string() const { return "DeleteDir"; }
 std::filesystem::path DeleteDirAction::get_path() const { return relative_path; }
-std::expected<void, std::string> DeleteDirAction::execute(const NetworkConnection&,
-														  const std::filesystem::path& base_path) const {
+std::expected<void, std::string> DeleteDirAction::execute(
+	const NetworkConnection&, const std::filesystem::path& base_path) const {
 	std::filesystem::remove_all(base_path / relative_path);
 	return {};
 }
-void DeleteDirAction::print(std::ostream& os) const {
-	os << "DeleteDir(" << relative_path << ")";
-}
+void DeleteDirAction::print(std::ostream& os) const { os << "DeleteDir(" << relative_path << ")"; }
 
 // --- FileAction ---
 FileAction::FileAction(std::filesystem::path path) : relative_path(std::move(path)) {}
@@ -51,8 +47,8 @@ std::unique_ptr<SyncAction> UpdateFileAction::clone() const {
 	return std::make_unique<UpdateFileAction>(*this);
 }
 std::string UpdateFileAction::get_type_string() const { return "UpdateFile"; }
-std::expected<void, std::string> UpdateFileAction::execute(const NetworkConnection& conn,
-														   const std::filesystem::path& base_path) const {
+std::expected<void, std::string> UpdateFileAction::execute(
+	const NetworkConnection& conn, const std::filesystem::path& base_path) const {
 	const auto req_res = conn.send_string("REQUEST " + relative_path.string());
 	if (!req_res) {
 		return req_res;
@@ -79,8 +75,8 @@ std::unique_ptr<SyncAction> DeleteFileAction::clone() const {
 	return std::make_unique<DeleteFileAction>(*this);
 }
 std::string DeleteFileAction::get_type_string() const { return "DeleteFile"; }
-std::expected<void, std::string> DeleteFileAction::execute(const NetworkConnection&,
-														   const std::filesystem::path& base_path) const {
+std::expected<void, std::string> DeleteFileAction::execute(
+	const NetworkConnection&, const std::filesystem::path& base_path) const {
 	std::filesystem::remove(base_path / relative_path);
 	return {};
 }
@@ -129,8 +125,8 @@ std::unique_ptr<SyncAction> RenameAction::clone() const {
 }
 std::string RenameAction::get_type_string() const { return "Rename"; }
 std::filesystem::path RenameAction::get_path() const { return new_path; }
-std::expected<void, std::string> RenameAction::execute(const NetworkConnection&,
-													   const std::filesystem::path& base_path) const {
+std::expected<void, std::string> RenameAction::execute(
+	const NetworkConnection&, const std::filesystem::path& base_path) const {
 	std::filesystem::rename(base_path / old_path, base_path / new_path);
 	return {};
 }
@@ -262,7 +258,8 @@ void compute_diff_impl(const Directory& local, const Directory& remote,
 			actions.emplace_back(
 				std::make_unique<ConflictFileAction>(next_relative, r_it->second->get_hash()));
 		} else if (r_it == remote_files.end()) {
-			actions.emplace_back(std::make_unique<UpdateFileAction>(next_relative, l_file->get_hash()));
+			actions.emplace_back(
+				std::make_unique<UpdateFileAction>(next_relative, l_file->get_hash()));
 		}
 	}
 }
