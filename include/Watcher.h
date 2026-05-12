@@ -9,16 +9,20 @@
 #include <thread>
 
 class DirectoryWatcher {
-	[[maybe_unused]] int inotify_fd;
+	int inotify_fd;
 	std::filesystem::path root_path;
 	std::atomic<bool> running;
 	std::thread watch_thread;
 
-	// Map watch descriptor to path to reconstruct full paths
-	[[maybe_unused]] std::map<int, std::filesystem::path> wd_to_path;
+	// Map watch descriptor to path to reconstruct full paths (Linux)
+	std::map<int, std::filesystem::path> wd_to_path;
+
+	// For polling-based watcher (Windows/macOS)
+	std::map<std::filesystem::path, std::filesystem::file_time_type> last_write_times;
 
 	void add_watches_recursive(const std::filesystem::path& path);
 	void watch_loop(const std::function<void()>& on_change);
+	bool poll_changes();
 
    public:
 	explicit DirectoryWatcher(std::filesystem::path path);

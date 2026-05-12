@@ -4,6 +4,7 @@
 #include <unistd.h>
 #endif
 
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
 #include <utility>
@@ -48,7 +49,36 @@ void DirectoryWatcher::add_watches_recursive([[maybe_unused]] const std::filesys
 #endif
 }
 
-void DirectoryWatcher::watch_loop([[maybe_unused]] const std::function<void()>& on_change) {
+bool DirectoryWatcher::poll_changes() {
+	bool changed = false;
+	std::map<std::filesystem::path, std::filesystem::file_time_type> current_times;
+
+	if (!std::filesystem::exists(root_path)) {
+		return false;
+	}
+
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(root_path)) {
+		if (entry.is_regular_file()) {
+			current_times[entry.path()] = entry.last_write_time();
+		}
+	}
+
+	if (current_times.size() != last_write_times.size()) {
+		changed = true;
+	} else {
+		for (const auto& [path, time] : current_times) {
+			if (!last_write_times.contains(path) || last_write_times[path] != time) {
+				changed = true;
+				break;
+			}
+		}
+	}
+
+	last_write_times = std::move(current_times);
+	return changed;
+}
+
+void DirectoryWatcher::watch_loop(const std::function<void()>& on_change) {
 #ifdef __linux__
 	const size_t buf_size = 4096;
 	char buffer[buf_size];
@@ -92,6 +122,14 @@ void DirectoryWatcher::watch_loop([[maybe_unused]] const std::function<void()>& 
 			}
 		}
 	}
+#else
+	// Polling implementation for Windows/macOS
+	while (running) {
+		if (poll_changes()) {
+			on_change();
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
 #endif
 }
 
@@ -100,8 +138,12 @@ void DirectoryWatcher::start(const std::function<void()>& on_change) {
 		return;
 	}
 
+#ifdef __linux__
 	wd_to_path.clear();
 	add_watches_recursive(root_path);
+#else
+	poll_changes();	 // Initialize times
+#endif
 
 	running = true;
 	watch_thread = std::thread([this, on_change]() { this->watch_loop(on_change); });
@@ -113,11 +155,6 @@ void DirectoryWatcher::stop() {
 		watch_thread.join();
 	}
 }
-
-// bool DirectoryWatcher::is_running() const { return running; } // Currently unused
-
-// const std::filesystem::path& DirectoryWatcher::get_watched_path() const { return root_path; } //
-// Currently unused
 
 std::ostream& operator<<(std::ostream& os, const DirectoryWatcher& watcher) {
 	os << "DirectoryWatcher(path=" << watcher.root_path

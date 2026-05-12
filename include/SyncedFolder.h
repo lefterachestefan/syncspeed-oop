@@ -12,6 +12,7 @@ enum class SyncDirectoryError {
 	AlreadySynced,
 	BadPermissions,
 	OutOfSpace,
+	InvalidPath,
 };
 
 class SyncedFolder {

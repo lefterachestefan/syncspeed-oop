@@ -12,6 +12,8 @@
 enum class DeviceKind {
 	Linux,
 	Android,
+	Windows,
+	MacOS,
 };
 
 enum class UnsyncDirectoryError {
@@ -23,8 +25,13 @@ class Device {
 	DeviceKind kind;
 	std::vector<SyncedFolder> folders;
 
+	static int total_devices;
+
    public:
 	explicit Device(std::string device_id);
+	~Device();
+
+	static int get_total_devices();
 
 	std::expected<void, FileError> rescan();
 

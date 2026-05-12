@@ -3,54 +3,145 @@
 
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include <string>
-#include <variant>
 #include <vector>
 
-namespace Sync {
-
-struct CreateDir {
-	std::filesystem::path relative_path;
-};
-
-struct DeleteDir {
-	std::filesystem::path relative_path;
-};
-
-struct UpdateFile {
-	std::filesystem::path relative_path;
-	std::string hash;
-};
-
-struct DeleteFile {
-	std::filesystem::path relative_path;
-};
-
-struct ConflictFile {
-	std::filesystem::path relative_path;
-	std::string remote_hash;
-};
-
-using Action = std::variant<CreateDir, DeleteDir, UpdateFile, DeleteFile, ConflictFile>;
-
-}  // namespace Sync
-
-class Directory;
+#include "Network.h"
 
 class SyncAction {
-	Sync::Action action;
-
    public:
-	explicit SyncAction(Sync::Action action);
+	virtual ~SyncAction() = default;
+	[[nodiscard]] virtual std::unique_ptr<SyncAction> clone() const = 0;
 
-	[[nodiscard]] const Sync::Action& get_action() const;
+	// NVI
+	void display(std::ostream& os) const { print(os); }
 
-	friend std::ostream& operator<<(std::ostream& os, const SyncAction& action);
+	[[nodiscard]] virtual std::string get_type_string() const = 0;
+	[[nodiscard]] virtual std::filesystem::path get_path() const = 0;
 
-	[[nodiscard]] std::string get_type_string() const;
-	[[nodiscard]] std::filesystem::path get_path() const;
+	// Theme specific virtual function
+	[[nodiscard]] virtual std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const = 0;
+
+   protected:
+	virtual void print(std::ostream& os) const = 0;
 };
 
-std::vector<SyncAction> compute_diff(const Directory& local, const Directory& remote);
+class CreateDirAction : public SyncAction {
+	std::filesystem::path relative_path;
+
+   public:
+	explicit CreateDirAction(std::filesystem::path path);
+	[[nodiscard]] std::unique_ptr<SyncAction> clone() const override;
+	[[nodiscard]] std::string get_type_string() const override;
+	[[nodiscard]] std::filesystem::path get_path() const override;
+	[[nodiscard]] std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const override;
+
+   protected:
+	void print(std::ostream& os) const override;
+};
+
+class DeleteDirAction : public SyncAction {
+	std::filesystem::path relative_path;
+
+   public:
+	explicit DeleteDirAction(std::filesystem::path path);
+	[[nodiscard]] std::unique_ptr<SyncAction> clone() const override;
+	[[nodiscard]] std::string get_type_string() const override;
+	[[nodiscard]] std::filesystem::path get_path() const override;
+	[[nodiscard]] std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const override;
+
+   protected:
+	void print(std::ostream& os) const override;
+};
+
+class FileAction : public SyncAction {
+   protected:
+	std::filesystem::path relative_path;
+
+   public:
+	explicit FileAction(std::filesystem::path path);
+	[[nodiscard]] std::filesystem::path get_path() const override;
+};
+
+class UpdateFileAction : public FileAction {
+	std::string hash;
+
+   public:
+	UpdateFileAction(std::filesystem::path path, std::string hash);
+	[[nodiscard]] std::unique_ptr<SyncAction> clone() const override;
+	[[nodiscard]] std::string get_type_string() const override;
+	[[nodiscard]] std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const override;
+
+   protected:
+	void print(std::ostream& os) const override;
+};
+
+class DeleteFileAction : public FileAction {
+   public:
+	explicit DeleteFileAction(std::filesystem::path path);
+	[[nodiscard]] std::unique_ptr<SyncAction> clone() const override;
+	[[nodiscard]] std::string get_type_string() const override;
+	[[nodiscard]] std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const override;
+
+   protected:
+	void print(std::ostream& os) const override;
+};
+
+class ConflictFileAction : public FileAction {
+	std::string remote_hash;
+
+   public:
+	ConflictFileAction(std::filesystem::path path, std::string remote_hash);
+	[[nodiscard]] std::unique_ptr<SyncAction> clone() const override;
+	[[nodiscard]] std::string get_type_string() const override;
+	[[nodiscard]] std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const override;
+
+   protected:
+	void print(std::ostream& os) const override;
+};
+
+class RenameAction : public SyncAction {
+	std::filesystem::path old_path;
+	std::filesystem::path new_path;
+
+   public:
+	RenameAction(std::filesystem::path old_p, std::filesystem::path new_p);
+	[[nodiscard]] std::unique_ptr<SyncAction> clone() const override;
+	[[nodiscard]] std::string get_type_string() const override;
+	[[nodiscard]] std::filesystem::path get_path() const override;
+	[[nodiscard]] std::expected<void, std::string> execute(
+		const NetworkConnection& conn, const std::filesystem::path& base_path) const override;
+
+   protected:
+	void print(std::ostream& os) const override;
+};
+
+// Class with pointer to base for T2 requirement
+class ActionWrapper {
+	std::unique_ptr<SyncAction> action;
+
+   public:
+	explicit ActionWrapper(std::unique_ptr<SyncAction> act);
+	ActionWrapper(const ActionWrapper& other);
+	ActionWrapper& operator=(ActionWrapper other);
+	~ActionWrapper() = default;
+
+	friend void swap(ActionWrapper& first, ActionWrapper& second) noexcept;
+
+	[[nodiscard]] const SyncAction& get() const;
+
+	friend std::ostream& operator<<(std::ostream& os, const ActionWrapper& wrapper);
+};
+
+class Directory;
+std::vector<std::unique_ptr<SyncAction>> compute_diff(const Directory& local,
+													  const Directory& remote);
 
 #endif

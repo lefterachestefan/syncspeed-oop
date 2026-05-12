@@ -4,62 +4,33 @@
 #include <sstream>
 #include <utility>
 
+#include <fmt/core.h>
+#include <fmt/ostream.h>
+
 #include "Directory.h"
 #include "SyncAction.h"
 #include "SyncSession.h"
 
 SyncSession::SyncSession(std::filesystem::path local_path)
-	: local_sync_folder(std::move(local_path)) {}
+	: local_sync_folder(std::move(local_path)) {
+	if (!std::filesystem::exists(local_sync_folder)) {
+		throw FileSystemError("Sync folder does not exist: " + local_sync_folder.string());
+	}
+}
 
 // const std::filesystem::path& SyncSession::get_local_path() const { return local_sync_folder; } //
 // Currently unused
 
 std::expected<void, std::string> send_actions(const NetworkConnection& conn,
 											  const std::filesystem::path& local_sync_folder,
-											  const std::vector<SyncAction>& actions) {
+											  const std::vector<std::unique_ptr<SyncAction>>& actions) {
 	for (const auto& sync_action : actions) {
-		const auto& action = sync_action.get_action();
-		if (std::holds_alternative<Sync::DeleteFile>(action)) {
-			const auto& act = std::get<Sync::DeleteFile>(action);
-			std::filesystem::remove(local_sync_folder / act.relative_path);
-		} else if (std::holds_alternative<Sync::DeleteDir>(action)) {
-			const auto& act = std::get<Sync::DeleteDir>(action);
-			std::filesystem::remove_all(local_sync_folder / act.relative_path);
-		} else if (std::holds_alternative<Sync::CreateDir>(action)) {
-			const auto& act = std::get<Sync::CreateDir>(action);
-			std::filesystem::create_directories(local_sync_folder / act.relative_path);
-		} else if (std::holds_alternative<Sync::UpdateFile>(action) ||
-				   std::holds_alternative<Sync::ConflictFile>(action)) {
-			std::filesystem::path rel_path;
-			bool is_conflict = false;
-
-			if (std::holds_alternative<Sync::UpdateFile>(action)) {
-				rel_path = std::get<Sync::UpdateFile>(action).relative_path;
-			} else {
-				rel_path = std::get<Sync::ConflictFile>(action).relative_path;
-				is_conflict = true;
-			}
-
-			const auto req_res = conn.send_string("REQUEST " + rel_path.string());
-			if (!req_res) {
-				return req_res;
-			}
-
-			const auto file_content_res = conn.recv_string();
-			if (!file_content_res) {
-				return std::unexpected<std::string>("Failed to recv file: " +
-													file_content_res.error());
-			}
-
-			const auto target_path = local_sync_folder / rel_path;
-			if (is_conflict) {
-				std::filesystem::rename(target_path, target_path.string() + ".conflict");
-			}
-
-			std::filesystem::create_directories(target_path.parent_path());
-			std::ofstream ofs(target_path, std::ios::binary);
-			// TODO: check later for all CPU's if this conversion to long is okay
-			ofs.write(file_content_res->data(), (long)file_content_res->size());
+		if (dynamic_cast<const ConflictFileAction*>(sync_action.get()) != nullptr) {
+			fmt::print("Handling conflict for: {}\n", sync_action->get_path().string());
+		}
+		const auto res = sync_action->execute(conn, local_sync_folder);
+		if (!res) {
+			return res;
 		}
 	}
 	const auto res = conn.send_string("DONE_ACTIONS");
