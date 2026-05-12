@@ -103,7 +103,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 - [ ] 2 șabloane de proiectare (design patterns)
 - [ ] o clasă șablon cu sens; minim **2 instanțieri**
   - [ ] preferabil și o funcție șablon (template) cu sens; minim 2 instanțieri
-- [ ] minim 80-90% din codul propriu să fie C++
+- [x] minim 80-90% din codul propriu să fie C++
 <!-- - [ ] o specializare pe funcție/clasă șablon -->
 - [ ] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.3` sau `v1.0`
 - [ ] code review #3 2 proiecte
