@@ -12,7 +12,12 @@
 #include "Watcher.h"
 
 DirectoryWatcher::DirectoryWatcher(std::filesystem::path path)
-	: inotify_fd(-1), root_path(std::move(path)), running(false) {
+	:
+#ifdef __linux__
+	  inotify_fd(-1),
+#endif
+	  root_path(std::move(path)),
+	  running(false) {
 #ifdef __linux__
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
@@ -30,9 +35,9 @@ DirectoryWatcher::~DirectoryWatcher() {
 #endif
 }
 
-// NOLINTNEXTLINE(misc-no-recursion)
-void DirectoryWatcher::add_watches_recursive([[maybe_unused]] const std::filesystem::path& path) {
 #ifdef __linux__
+// NOLINTNEXTLINE(misc-no-recursion)
+void DirectoryWatcher::add_watches_recursive(const std::filesystem::path& path) {
 	const int wd = inotify_add_watch(
 		inotify_fd, path.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_FROM | IN_MOVED_TO);
 	if (wd >= 0) {
@@ -46,9 +51,10 @@ void DirectoryWatcher::add_watches_recursive([[maybe_unused]] const std::filesys
 			}
 		}
 	}
-#endif
 }
+#endif
 
+#ifndef __linux__
 bool DirectoryWatcher::poll_changes() {
 	bool changed = false;
 	std::map<std::filesystem::path, std::filesystem::file_time_type> current_times;
@@ -77,6 +83,7 @@ bool DirectoryWatcher::poll_changes() {
 	last_write_times = std::move(current_times);
 	return changed;
 }
+#endif
 
 void DirectoryWatcher::watch_loop(const std::function<void()>& on_change) {
 #ifdef __linux__
