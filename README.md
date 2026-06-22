@@ -11,11 +11,6 @@ Demo:
 
 <https://github.com/user-attachments/assets/28805cf4-48fb-4fc5-b1a1-1794f9a3d454>
 
-future work:
-
-- [ ] support windows and macos
-- [ ] two way sync
-- [ ] interface
 
 ---
 
@@ -94,19 +89,20 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
   - [x] noua derivată nu poate fi una existentă care a fost ștearsă și adăugată din nou
   - [x] noua derivată va fi integrată în codul existent (adică va fi folosită, nu adăugată doar ca să fie)
 - [x] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.2`
-- [ ] code review #2 2 proiecte
+- [x] code review #2 2 proiecte
 
 ## Tema 3
 
 #### Cerințe
 
-- [ ] 2 șabloane de proiectare (design patterns)
-- [ ] o clasă șablon cu sens; minim **2 instanțieri**
-  - [ ] preferabil și o funcție șablon (template) cu sens; minim 2 instanțieri
+- [x] 2 șabloane de proiectare (design patterns)
+- [x] o clasă șablon cu sens; minim **2 instanțieri**
+  - [x] preferabil și o funcție șablon (template) cu sens; minim 2 instanțieri
 - [x] minim 80-90% din codul propriu să fie C++
 <!-- - [ ] o specializare pe funcție/clasă șablon -->
-- [ ] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.3` sau `v1.0`
-- [ ] code review #3 2 proiecte
+- [x] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.3` sau `v1.0`
+  - [x] extra de la mine: CI ce verifică logica acestui proiect specifically 
+- [x] code review #3 2 proiecte
 
 ## Instrucțiuni de compilare
 
