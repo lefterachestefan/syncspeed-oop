@@ -20,10 +20,6 @@ SyncSession::SyncSession(std::filesystem::path local_path, bool verbose, size_t 
 	}
 }
 
-bool SyncSession::is_verbose() const { return verbose; }
-
-size_t SyncSession::get_max_retries() const { return max_retries; }
-
 std::expected<void, std::string> send_actions(const NetworkConnection& conn,
 											  const std::filesystem::path& local_sync_folder,
 											  const std::vector<ActionWrapper>& actions) {
@@ -61,7 +57,7 @@ std::expected<void, std::string> serve_requests(const NetworkConnection& conn,
 			std::ifstream ifs(full_path, std::ios::binary);
 			if (!ifs) {
 				return std::unexpected<std::string>("Failed to open file for sending: " +
-												   full_path.string());
+													full_path.string());
 			}
 
 			std::ostringstream file_oss;
@@ -211,4 +207,6 @@ SyncSessionBuilder& SyncSessionBuilder::set_max_retries(size_t retries) {
 	return *this;
 }
 
-SyncSession SyncSessionBuilder::build() { return SyncSession(std::move(path), verbose, max_retries); }
+SyncSession SyncSessionBuilder::build() {
+	return SyncSession(std::move(path), verbose, max_retries);
+}

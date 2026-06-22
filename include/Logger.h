@@ -4,14 +4,9 @@
 #include <fmt/core.h>
 
 #include <chrono>
-#include <iostream>
+#include <expected>
 #include <string>
 #include <vector>
-
-// Template class: Logger<Category>
-// A typed logging facility parameterized by a tag type so that different
-// subsystems get independent log histories and can be queried separately.
-// Instantiated at least twice (with NetworkTag and SyncTag).
 
 struct NetworkTag {};
 struct SyncTag {};
@@ -41,8 +36,6 @@ class Logger {
 		fmt::print("[{}] {}\n", tag_name(), msg);
 	}
 
-	[[nodiscard]] const std::vector<Entry>& get_entries() const { return entries; }
-
 	[[nodiscard]] size_t count() const { return entries.size(); }
 
 	void clear() { entries.clear(); }
@@ -59,13 +52,9 @@ class Logger {
 	}
 };
 
-// Convenience aliases — these are the two required instantiations
 using NetworkLogger = Logger<NetworkTag>;
 using SyncLogger = Logger<SyncTag>;
 
-// Template function: log_result<T>
-// Inspects a std::expected<T, std::string> and logs success/failure.
-// Used at least twice (in SyncSession for both client and server sides).
 template <typename T>
 bool log_result(const std::expected<T, std::string>& result, const std::string& context,
 				Logger<SyncTag>& logger) {
@@ -77,7 +66,6 @@ bool log_result(const std::expected<T, std::string>& result, const std::string& 
 	return false;
 }
 
-// Overload for NetworkTag logger
 template <typename T>
 bool log_result(const std::expected<T, std::string>& result, const std::string& context,
 				Logger<NetworkTag>& logger) {

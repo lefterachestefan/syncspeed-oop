@@ -18,6 +18,8 @@ class DirectoryWatcher {
 
 #ifdef __linux__
 	// Map watch descriptor to path to reconstruct full paths (Linux)
+	// I also don't know if my program is bad or whatever but the watch for change is really bad on
+	// any platform
 	std::map<int, std::filesystem::path> wd_to_path;
 #else
 	// For polling-based watcher (Windows/macOS)
@@ -40,9 +42,6 @@ class DirectoryWatcher {
 
 	void start(const std::function<void()>& on_change);
 	void stop();
-
-	// [[nodiscard]] bool is_running() const; // Currently unused
-	// [[nodiscard]] const std::filesystem::path& get_watched_path() const; // Currently unused
 
 	friend std::ostream& operator<<(std::ostream& os, const DirectoryWatcher& watcher);
 };

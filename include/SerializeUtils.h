@@ -10,6 +10,7 @@ inline void write_string(std::ostream& os, const std::string& str) {
 	size_t len = str.size();
 	os.write(reinterpret_cast<const char*>(&len), sizeof(len));
 	// TODO: check later for all CPU's if this conversion to long is okay
+	// aktually nvm we only support supported CPUs
 	os.write(str.data(), (long)len);
 }
 
