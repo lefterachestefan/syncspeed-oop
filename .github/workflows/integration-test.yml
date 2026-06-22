@@ -1,0 +1,156 @@
+name: Integration Test
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Debug
+  EXECUTABLE_NAME: "oop"
+  BUILD_DIR: "build"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  file-transfer-test:
+    name: "Linux File Transfer Test"
+    # renovate: depName=ubuntu
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    env:
+      CC: gcc-14
+      CXX: g++-14
+
+    steps:
+      - name: Checkout repo
+        # renovate: datasource=github-tags depName=actions/checkout versioning=loose
+        uses: actions/checkout@v6.0.2
+
+      - name: Install Ninja
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ninja-build
+
+      - name: Configure CMake
+        run: |
+          export CMAKE_GENERATOR=Ninja
+          bash ./scripts/cmake.sh configure \
+            -b ${{ env.BUILD_DIR }} \
+            -c ${{ env.BUILD_TYPE }} \
+            -e "-DGITHUB_ACTIONS=${GITHUB_ACTIONS}"
+
+      - name: Build
+        run: |
+          bash ./scripts/cmake.sh build -c ${{ env.BUILD_TYPE }}
+
+      - name: Test file transfer (Linux ↔ Linux)
+        run: |
+          set -euo pipefail
+
+          BINARY="./${{ env.BUILD_DIR }}/${EXECUTABLE_NAME}"
+          PORT=9876
+          SERVER_DIR="$(mktemp -d)"
+          CLIENT_DIR="$(mktemp -d)"
+
+          echo "=== Setting up test directories ==="
+          echo "Server dir: ${SERVER_DIR}"
+          echo "Client dir: ${CLIENT_DIR}"
+
+          # --- Create test files in client directory ---
+          echo "Hello from client!" > "${CLIENT_DIR}/hello.txt"
+          echo "Second file content" > "${CLIENT_DIR}/data.csv"
+          mkdir -p "${CLIENT_DIR}/subdir"
+          echo "Nested file" > "${CLIENT_DIR}/subdir/nested.txt"
+          # Binary-like content
+          dd if=/dev/urandom of="${CLIENT_DIR}/random.bin" bs=1024 count=4 2>/dev/null
+
+          echo "=== Client files before sync ==="
+          find "${CLIENT_DIR}" -type f | sort
+          echo ""
+
+          echo "=== Starting server on port ${PORT} ==="
+          ${BINARY} server ${PORT} "${SERVER_DIR}" &
+          SERVER_PID=$!
+          echo "Server PID: ${SERVER_PID}"
+
+          # Wait for the server to bind
+          sleep 2
+
+          # Verify server is still running
+          if ! kill -0 ${SERVER_PID} 2>/dev/null; then
+            echo "ERROR: Server process died unexpectedly"
+            exit 1
+          fi
+
+          echo "=== Running client sync ==="
+          # The client runs a single sync cycle then we kill it.
+          # Start client in background, let it sync once, then stop it.
+          timeout 10 ${BINARY} client 127.0.0.1 ${PORT} "${CLIENT_DIR}" &
+          CLIENT_PID=$!
+
+          # Give the sync time to complete
+          sleep 5
+
+          # Kill client (it loops forever by design)
+          kill ${CLIENT_PID} 2>/dev/null || true
+          wait ${CLIENT_PID} 2>/dev/null || true
+
+          echo "=== Server files after sync ==="
+          find "${SERVER_DIR}" -type f | sort
+          echo ""
+
+          # --- Verify transferred files ---
+          PASS=true
+
+          verify_file() {
+            local file="$1"
+            local relpath="${file#${CLIENT_DIR}/}"
+            local server_file="${SERVER_DIR}/${relpath}"
+
+            if [ ! -f "${server_file}" ]; then
+              echo "FAIL: ${relpath} not found on server"
+              PASS=false
+              return
+            fi
+
+            if cmp -s "${file}" "${server_file}"; then
+              echo "PASS: ${relpath} transferred correctly"
+            else
+              echo "FAIL: ${relpath} content mismatch"
+              echo "  Client: $(head -c 100 "${file}" | xxd | head -2)"
+              echo "  Server: $(head -c 100 "${server_file}" | xxd | head -2)"
+              PASS=false
+            fi
+          }
+
+          echo "=== Verifying file transfer ==="
+          verify_file "${CLIENT_DIR}/hello.txt"
+          verify_file "${CLIENT_DIR}/data.csv"
+          verify_file "${CLIENT_DIR}/subdir/nested.txt"
+          verify_file "${CLIENT_DIR}/random.bin"
+
+          # Verify directory structure was created
+          if [ -d "${SERVER_DIR}/subdir" ]; then
+            echo "PASS: subdirectory created on server"
+          else
+            echo "FAIL: subdirectory not created on server"
+            PASS=false
+          fi
+
+          # --- Cleanup ---
+          echo "=== Cleanup ==="
+          kill ${SERVER_PID} 2>/dev/null || true
+          wait ${SERVER_PID} 2>/dev/null || true
+          rm -rf "${SERVER_DIR}" "${CLIENT_DIR}"
+
+          echo ""
+          if [ "${PASS}" = true ]; then
+            echo "✅ All file transfer tests passed!"
+          else
+            echo "❌ Some file transfer tests failed!"
+            exit 1
+          fi
