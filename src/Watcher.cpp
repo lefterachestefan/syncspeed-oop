@@ -97,12 +97,12 @@ void DirectoryWatcher::watch_loop(const std::function<void()>& on_change) {
 	pfd.events = POLLIN;
 
 	while (running) {
-		int ret = poll(&pfd, 1, 500);  // Wait up to 500ms
+		int ret = poll(&pfd, 1, 500);
 		if (ret < 0) {
 			break;
 		}
 		if (ret == 0) {
-			continue;  // Timeout
+			continue;
 		}
 
 		if (pfd.revents & POLLIN) {
@@ -132,7 +132,6 @@ void DirectoryWatcher::watch_loop(const std::function<void()>& on_change) {
 		}
 	}
 #else
-	// Polling implementation for Windows/macOS
 	while (running) {
 		if (poll_changes()) {
 			on_change();
@@ -151,7 +150,7 @@ void DirectoryWatcher::start(const std::function<void()>& on_change) {
 	wd_to_path.clear();
 	add_watches_recursive(root_path);
 #else
-	poll_changes();	 // Initialize times
+	poll_changes();
 #endif
 
 	running = true;

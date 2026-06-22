@@ -12,6 +12,7 @@
 #include "include/Config.h"
 #include "include/Device.h"
 #include "include/Directory.h"
+#include "include/Logger.h"
 #include "include/Network.h"
 #include "include/SyncAction.h"
 #include "include/SyncException.h"
@@ -26,7 +27,8 @@ template <> struct fmt::formatter<DirectoryWatcher> : ostream_formatter {};
 
 int main(const int argc, const char** argv) {
 	try {
-		Config config("config.json");
+		// Singleton pattern: initialize the global Config once
+		Config& config = Config::initialize("config.json");
 
 		if (argc < 2) {
 			fmt::print("Usage:\n");
@@ -52,12 +54,19 @@ int main(const int argc, const char** argv) {
 			fmt::print("Files: {}\n", dir_res->count_files());
 			fmt::print("Subdirs: {}\n", dir_res->count_directories());
 
-			Device dev(config.get_device_name());
+			// Singleton pattern: access Config from anywhere via instance()
+			Device dev(Config::instance().get_device_name());
 			const auto sync_res = dev.sync_folder(folder);
 			if (sync_res) {
 				fmt::print("Device status: {}\n", dev);
 			}
 			fmt::print("Total devices active: {}\n", Device::get_total_devices());
+
+			// Template class Logger<NetworkTag> — second instantiation
+			auto& net_logger = NetworkLogger::instance();
+			net_logger.log("Info mode completed for: " + folder.string());
+			fmt::print("Network log entries: {}\n", net_logger.count());
+
 			return 0;
 		}
 
@@ -69,14 +78,24 @@ int main(const int argc, const char** argv) {
 			const std::filesystem::path folder = argv[3];
 			std::filesystem::create_directories(folder);
 
+			// Template class Logger<NetworkTag> used here
+			auto& net_logger = NetworkLogger::instance();
+
 			const NetworkServer server;
 			const auto res = server.bind_and_listen(port);
+			// Template function log_result<T> — instantiated with T=void via NetworkLogger
+			log_result(res, "Server bind and listen", net_logger);
 			if (!res) {
 				throw NetworkError("Server bind/listen failed: " + res.error());
 			}
 			fmt::print("{} listening on port {}...\n", server, port);
 
-			SyncSession session(folder);
+			// Builder pattern: construct SyncSession with optional configuration
+			SyncSession session = SyncSessionBuilder(folder)
+									  .set_verbose(true)
+									  .set_max_retries(5)
+									  .build();
+
 			while (true) {
 				const auto client_res = server.accept_connection();
 				if (!client_res) {
@@ -111,7 +130,9 @@ int main(const int argc, const char** argv) {
 				trigger_sync = true;
 			});
 
-			SyncSession session(folder);
+			// Builder pattern: construct SyncSession with default configuration
+			SyncSession session = SyncSessionBuilder(folder).build();
+
 			while (true) {
 				bool should_sync = false;
 				{

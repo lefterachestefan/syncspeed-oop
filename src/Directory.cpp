@@ -123,6 +123,3 @@ size_t Directory::count_directories() const {
 	}
 	return count;
 }
-
-// currently unused
-// bool Directory::is_empty() const { return children.empty(); }

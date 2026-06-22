@@ -8,11 +8,12 @@
 
 #include "SyncException.h"
 
+// Singleton Pattern: Config is a globally-unique configuration object.
+// Initialized once via Config::initialize(), then accessed via Config::instance().
 class Config {
 	std::string device_name;
 	uint16_t default_port;
 
-   public:
 	explicit Config(const std::filesystem::path& path) {
 		if (!std::filesystem::exists(path)) {
 			device_name = "default-device";
@@ -35,7 +36,21 @@ class Config {
 		}
 	}
 
+   public:
+	Config(const Config&) = delete;
+	Config& operator=(const Config&) = delete;
+
+	// First call creates the singleton with the given config file path.
+	// Subsequent calls ignore the argument and return the existing instance.
+	static Config& initialize(const std::filesystem::path& path = "config.json") {
+		static Config inst(path);
+		return inst;
+	}
+
+	static Config& instance() { return initialize(); }
+
 	[[nodiscard]] const std::string& get_device_name() const { return device_name; }
+	[[nodiscard]] uint16_t get_default_port() const { return default_port; }
 };
 
 #endif
