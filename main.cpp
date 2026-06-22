@@ -28,7 +28,7 @@ template <> struct fmt::formatter<DirectoryWatcher> : ostream_formatter {};
 int main(const int argc, const char** argv) {
 	try {
 		// Singleton pattern: initialize the global Config once
-		Config& config = Config::initialize("config.json");
+		Config::initialize("config.json");
 
 		if (argc < 2) {
 			fmt::print("Usage:\n");
